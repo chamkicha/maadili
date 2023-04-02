@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Country;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,11 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('regions', function (Blueprint $table) {
+        Schema::create('source_of_incomes', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class,'country_id')->index()->constrained()->onDelete('cascade');
-            $table->string('region_name');
-            $table->string('region_code')->nullable();
+            $table->string('source');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('regions');
+        Schema::dropIfExists('source_of_incomes');
     }
 };

@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Marital_status;
+use App\Models\Ward;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -24,6 +26,11 @@ return new class extends Migration
             $table->string('nida')->unique()->nullable();
             $table->string('email')->unique()->nullable();
             $table->string('otp')->nullable();
+            $table->string('nationality')->nullable();
+            $table->string('po_box')->nullable();
+            $table->string('village')->nullable();
+            $table->foreignIdFor(Ward::class,'ward_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Marital_status::class,'marital_status_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->string('date_of_birth')->nullable();
             $table->timestamp('verified_at')->nullable();
             $table->boolean('is_active')->default(true);

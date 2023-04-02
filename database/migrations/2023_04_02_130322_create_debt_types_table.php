@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Declaration_type;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,10 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('declaration_type_sections', function (Blueprint $table) {
+        Schema::create('debt_types', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor( Declaration_type::class,'declaration_type_id')->index()->constrained()->onDelete('cascade');
-            $table->string('section_title');
+            $table->string('type');
             $table->timestamps();
         });
     }
@@ -29,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('declaration_type_sections');
+        Schema::dropIfExists('debt_types');
     }
 };

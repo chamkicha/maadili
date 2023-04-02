@@ -1,6 +1,7 @@
 <?php
 
-use App\Models\Requirement;
+use App\Models\Debt_type;
+use App\Models\Family_member;
 use App\Models\User_declaration;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -15,12 +16,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('declared_informations', function (Blueprint $table) {
+        Schema::create('debts', function (Blueprint $table) {
             $table->id();
             $table->string('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Requirement::class,'requirement_id')->index()->constrained()->onDelete('cascade');
-            $table->string('value');
+            $table->foreignIdFor(Family_member::class,'family_member_id')->nullable()->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Debt_type::class,'debt_type_id')->nullable()->index()->constrained()->onDelete('cascade');
+            $table->string('institute')->nullable();
+            $table->float('amount',30,2)->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +35,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('declared_informations');
+        Schema::dropIfExists('debts');
     }
 };

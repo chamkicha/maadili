@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Section_requirement extends Model
+class Transportation extends Model
 {
     use HasFactory;
 }
