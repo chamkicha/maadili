@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('declaration_receipts', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->string('receipt_number')->unique();
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->timestamps();

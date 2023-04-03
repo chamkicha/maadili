@@ -23,7 +23,7 @@ return new class extends Migration
     {
         Schema::create('house_and_buildings', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Family_member::class,'family_member_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Building_type::class,'building_type_id')->nullable()->index()->constrained()->onDelete('cascade');

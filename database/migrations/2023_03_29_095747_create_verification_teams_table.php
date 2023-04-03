@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('verification_teams', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->string('name');
             $table->foreignIdFor(Financial_year::class,'year_of_verification')->index();
             $table->foreign('year_of_verification')->references('id')->on('financial_years')->onDelete('cascade');

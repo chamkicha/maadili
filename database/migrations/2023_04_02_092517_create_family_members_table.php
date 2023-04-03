@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Family_member_type;
+use App\Models\Sex;
 use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,9 +18,10 @@ return new class extends Migration
     {
         Schema::create('family_members', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->foreignIdFor(User::class,'user_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Family_member_type::class,'family_member_type_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Sex::class,'sex_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->string('first_name')->nullable();
             $table->string('middle_name')->nullable();
             $table->string('last_name')->nullable();

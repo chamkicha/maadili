@@ -20,7 +20,7 @@ return new class extends Migration
     {
         Schema::create('employment_informations', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->string('date_of_employment');
             $table->foreignIdFor(Title::class,'title_id')->index()->constrained()->onDelete('cascade');

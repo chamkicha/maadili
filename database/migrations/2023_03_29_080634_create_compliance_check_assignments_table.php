@@ -16,9 +16,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('declaration_compliance_check_assignments', function (Blueprint $table) {
+        Schema::create('compliance_check_assignments', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('assignee_staff')->index();
             $table->unsignedBigInteger('assigned_by')->index();

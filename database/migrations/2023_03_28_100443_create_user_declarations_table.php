@@ -18,6 +18,7 @@ return new class extends Migration
     {
         Schema::create('user_declarations', function (Blueprint $table) {
             $table->id();
+            $table->uuid('secure_token');
             $table->foreignIdFor(User::class,'user_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Declaration_type::class,'declaration_type_id')->index()->constrained()->onDelete('cascade');
             $table->string('adf_number')->unique()->nullable();

@@ -13,12 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('declaration_types', function (Blueprint $table) {
+        Schema::create('sexes', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
-            $table->string('type');
-            $table->string('declaration_code')->nullable();
-            $table->boolean('is_available')->default(true);
+            $table->string('sex');
             $table->timestamps();
         });
     }
@@ -30,6 +27,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('declaration_types');
+        Schema::dropIfExists('sexes');
     }
 };

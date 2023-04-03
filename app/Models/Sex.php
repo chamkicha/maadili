@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Declaration_compliance_check_assignment extends Model
+class Sex extends Model
 {
     use HasFactory;
 }

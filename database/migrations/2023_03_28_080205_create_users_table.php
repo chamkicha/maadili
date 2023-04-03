@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Marital_status;
+use App\Models\Sex;
 use App\Models\Ward;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -17,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('users', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->string('file_number')->nullable()->unique();
             $table->string('profile_picture')->nullable();
             $table->string('first_name')->nullable();
@@ -31,6 +32,7 @@ return new class extends Migration
             $table->string('village')->nullable();
             $table->foreignIdFor(Ward::class,'ward_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Marital_status::class,'marital_status_id')->nullable()->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Sex::class,'sex_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->string('date_of_birth')->nullable();
             $table->timestamp('verified_at')->nullable();
             $table->boolean('is_active')->default(true);

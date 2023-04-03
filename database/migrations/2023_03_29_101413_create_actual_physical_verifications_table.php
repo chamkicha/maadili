@@ -18,7 +18,7 @@ return new class extends Migration
     {
         Schema::create('actual_physical_verifications', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Staff::class,'staff_id')->index()->constrained()->onDelete('cascade');
             $table->unsignedBigInteger('year')->index();

@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\Declaration_compliance_check_assignment;
+use App\Models\Compliance_check_assignment;
 use App\Models\Declaration_type_section;
 use App\Models\Staff;
 use App\Models\Status;
@@ -20,6 +20,7 @@ return new class extends Migration
     {
         Schema::create('declaration_compliance_checks', function (Blueprint $table) {
             $table->id();
+            $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Status::class,'status_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Staff::class,'staff_id')->index()->constrained()->onDelete('cascade');

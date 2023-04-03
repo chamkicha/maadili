@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('declaration_downloads', function (Blueprint $table) {
             $table->id();
-            $table->string('secure_token');
+            $table->uuid('secure_token');
             $table->string('downloader_secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
             $table->string('password');
