@@ -39,4 +39,5 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::get('property-type', 'propertyType');
     Route::get('transport-types', 'transportTypes');
     Route::get('debt-types', 'debtTypes');
+    Route::get('uuid', 'uuid');
 });

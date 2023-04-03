@@ -22,6 +22,7 @@ use App\Models\Type_of_use;
 use App\Models\Ward;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class lookUpDataController extends Controller
 {
@@ -189,5 +190,10 @@ class lookUpDataController extends Controller
         $response = ['debt_types' => $debt_types];
 
         return response()->json($response,200);
+    }
+
+    public function uuid(){
+
+        return Str::uuid();
     }
 }
