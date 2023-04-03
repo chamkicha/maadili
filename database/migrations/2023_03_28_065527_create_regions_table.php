@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('regions', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Country::class,'country_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Country::class,'country_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->string('region_name');
             $table->string('region_code')->nullable();
             $table->timestamps();
