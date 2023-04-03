@@ -48,7 +48,7 @@ class lookUpDataController extends Controller
     public function districts($RegionCode): JsonResponse
     {
 
-        $districts = District::where('RegionCode','=',$RegionCode)->get();
+        $districts = District::where('region_code','=',$RegionCode)->get();
 
         $response = ['districts' => $districts];
 
@@ -58,7 +58,7 @@ class lookUpDataController extends Controller
     public function wards($LgaCode): JsonResponse
     {
 
-        $wards = Ward::where('LgaCode','=',$LgaCode)->get();
+        $wards = Ward::where('district_code','=',$LgaCode)->get();
 
         $response = ['wards' => $wards];
 
