@@ -20,7 +20,7 @@ class userDeclarationController extends Controller
             'box' => 'required',
             'ward' => 'required|integer',
             'phone_number' => 'required',
-            'title' => 'required',
+            'title' => 'required|integer',
             'employment_date' => 'required',
             'employer_name' => 'required|integer',
             'employer_type' => 'required|integer',
