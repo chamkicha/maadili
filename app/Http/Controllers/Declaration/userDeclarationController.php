@@ -16,7 +16,7 @@ class userDeclarationController extends Controller
             'declaration_type' => 'required|integer',
             'date_of_birth' => 'required',
             'marital_status' => 'required',
-            'nationality' => 'required|integer',
+            'nationality' => 'required',
             'box' => 'required',
             'ward' => 'required|integer',
             'phone_number' => 'required',
