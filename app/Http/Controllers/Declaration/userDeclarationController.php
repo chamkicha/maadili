@@ -13,12 +13,12 @@ class userDeclarationController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'declaration_type' => 'required',
+            'declaration_type' => 'required|integer',
             'date_of_birth' => 'required',
             'marital_status' => 'required',
-            'nationality' => 'required',
+            'nationality' => 'required|integer',
             'box' => 'required',
-            'ward' => 'required',
+            'ward' => 'required|integer',
             'phone_number' => 'required',
             'title' => 'required',
             'employment_date' => 'required',
