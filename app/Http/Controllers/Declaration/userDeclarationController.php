@@ -70,7 +70,7 @@ class userDeclarationController extends Controller
             'transportations.*.family_member' => 'required|integer',
             'transportations.*.transportation_type' => 'required|integer',
             'transportations.*.transport_number' => 'required|string',
-            'transportations.*.cost' => 'required|float',
+            'transportations.*.cost' => 'required|string',
             'transportations.*.source_of_income' => 'required|integer',
             'transportations.*.country' => 'required|integer',
             'transportations.*.region' => 'required|integer',
