@@ -29,7 +29,6 @@ return new class extends Migration
             $table->string('refresh_token')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->foreign('created_by')->references('id')->on('staff')->onUpdate('cascade')->onDelete('cascade');
-            $table->foreignIdFor(Role::class,'role_id')->index()->constrained()->onDelete('cascade');
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
