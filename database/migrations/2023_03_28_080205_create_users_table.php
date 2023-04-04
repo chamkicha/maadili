@@ -2,6 +2,7 @@
 
 use App\Models\Marital_status;
 use App\Models\Sex;
+use App\Models\Staff;
 use App\Models\Ward;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,6 +20,7 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
+            $table->foreignIdFor(Staff::class,'staff_id')->index()->constrained()->onDelete('cascade');
             $table->string('file_number')->nullable()->unique();
             $table->string('profile_picture')->nullable();
             $table->string('first_name')->nullable();

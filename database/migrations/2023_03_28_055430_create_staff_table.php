@@ -26,7 +26,9 @@ return new class extends Migration
             $table->timestamp('verified_at')->nullable();
             $table->timestamp('current_login')->nullable();
             $table->timestamp('last_login')->nullable();
-            $table->string('token')->nullable();
+            $table->string('refresh_token')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onUpdate('cascade')->onDelete('cascade');
             $table->foreignIdFor(Role::class,'role_id')->index()->constrained()->onDelete('cascade');
             $table->string('password');
             $table->rememberToken();
