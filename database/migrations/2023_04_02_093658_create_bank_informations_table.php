@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Family_member;
+use App\Models\Source_of_income;
 use App\Models\Type_of_use;
 use App\Models\User_declaration;
 use Illuminate\Database\Migrations\Migration;
@@ -24,7 +25,7 @@ return new class extends Migration
             $table->string('institute_name')->nullable();
             $table->string('account_number')->nullable();
             $table->float('amount',30,2);
-            $table->string('source')->nullable();
+            $table->foreignIdFor(Source_of_income::class,'source_of_income_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->float('profit',30,2)->nullable();
             $table->boolean('is_local')->default(true);
             $table->foreignIdFor(Type_of_use::class,'type_of_use_id')->index()->constrained()->onDelete('cascade');

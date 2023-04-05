@@ -22,7 +22,6 @@ return new class extends Migration
             $table->id();
             $table->uuid('secure_token');
             $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
-            $table->string('date_of_employment');
             $table->foreignIdFor(Title::class,'title_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Office::class,'office_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Employment_type::class,'employment_type_id')->index()->constrained()->onDelete('cascade');
