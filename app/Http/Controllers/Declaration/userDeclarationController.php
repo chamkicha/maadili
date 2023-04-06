@@ -51,7 +51,7 @@ class userDeclarationController extends Controller
             'bank_information.*.is_local' => 'required',
             'bank_information.*.family_member' => 'integer',
             'share_and_dividend' => 'required|array',
-            'share_and_dividend.*.share_amount' => 'required|string',
+            'share_and_dividend.*.amount_of_stock' => 'required|string',
             'share_and_dividend.*.institute_name' => 'required|string',
             'share_and_dividend.*.family_member' => 'integer',
             'share_and_dividend.*.country' => 'integer',
@@ -195,7 +195,7 @@ class userDeclarationController extends Controller
                     'country_id' => $share['country'],
                     'region_id' => $share['region'],
                     'district_id' => $share['district'],
-                    'amount_of_dividend' => $share['amount_of_dividend']
+                    'amount_of_dividend' => $share['dividend_amount']
                 ];
 
                 $declaration->share_and_dividends()->updateOrCreate($share_data);

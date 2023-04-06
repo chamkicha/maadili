@@ -30,6 +30,7 @@ return new class extends Migration
             $table->float('income_from_other_source_per_year',10,2)->nullable();
             $table->string('from',);
             $table->string('to')->nullable();
+            $table->boolean('is_current')->default(true);
             $table->timestamps();
         });
     }
