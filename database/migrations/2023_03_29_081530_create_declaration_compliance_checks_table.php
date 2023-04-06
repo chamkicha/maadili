@@ -26,6 +26,7 @@ return new class extends Migration
             $table->foreignIdFor(Staff::class,'staff_id')->index()->constrained()->onDelete('cascade');
             $table->boolean('physical_verification_needed')->default(false);
             $table->longText('comment')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

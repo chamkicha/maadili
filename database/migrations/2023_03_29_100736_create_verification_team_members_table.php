@@ -21,6 +21,7 @@ return new class extends Migration
             $table->foreignIdFor(Verification_team::class,'verification_team_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Staff::class,'staff_id')->index()->constrained()->onDelete('cascade');
             $table->boolean('is_leader')->default(false);
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

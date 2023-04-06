@@ -27,6 +27,7 @@ return new class extends Migration
             $table->foreignIdFor(Compliance_check_type::class,'compliance_check_type_id')->index()->constrained()->onDelete('cascade');
             $table->timestamp('deadline');
             $table->longText('comment')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

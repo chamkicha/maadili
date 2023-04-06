@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedBigInteger('year')->index();
             $table->foreign('year')->references('id')->on('financial_years')->onDelete('cascade');
             $table->longText('comment')->nullable();
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

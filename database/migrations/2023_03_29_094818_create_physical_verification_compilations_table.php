@@ -30,6 +30,7 @@ return new class extends Migration
             $table->longText('comment')->nullable();
             $table->text('remark')->nullable();
             $table->boolean('need_for_verification')->default(false);
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

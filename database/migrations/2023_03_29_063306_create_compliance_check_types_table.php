@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('compliance_check_types', function (Blueprint $table) {
             $table->id();
             $table->string('type');
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }

@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('location')->nullable();
             $table->string('description')->nullable();
             $table->timestamp('deadline');
+            $table->timestamp('deleted_at')->nullable();
             $table->timestamps();
         });
     }
