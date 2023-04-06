@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Zone;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,7 @@ return new class extends Migration
     {
         Schema::table('regions', function (Blueprint $table) {
             $table->integer('api_id')->nullable();
+            $table->foreignIdFor(Zone::class,'zone_id')->nullable()->index()->constrained()->onDelete('cascade');
         });
     }
 
@@ -27,6 +29,7 @@ return new class extends Migration
     {
         Schema::table('regions', function (Blueprint $table) {
             $table->dropColumn('api_id');
+            $table->dropColumn('zone_id');
         });
     }
 };

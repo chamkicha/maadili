@@ -39,7 +39,7 @@ class userDeclarationController extends Controller
             'former_revenue_per_year' => 'required|string',
             'cash_in_hand' => 'required|array',
             'cash_in_hand.*.family_member' => 'integer',
-            'cash_in_hand.*.cash' => 'required|integer',
+            'cash_in_hand.*.cash' => 'required|string',
             'bank_information' => 'required|array',
             'bank_information.*.bank_name' => 'required|string',
             'bank_information.*.account_number' => 'required|string',
