@@ -56,7 +56,7 @@ class AuthenticationController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()
-            ->json(['statusCode' => 200, 'message' => 'Hi '.$user->first_name.' '.$user->middle_name.' '.$user->last_name.', karibu kwenye ODS','user' => $user->nida,'access_token' => $token, 'token_type' => 'Bearer', ]);
+            ->json(['statusCode' => 200, 'message' => 'Hi '.$user->first_name.' '.$user->middle_name.' '.$user->last_name.', karibu kwenye ODS','user' => $user->first_name.' '.$user->middle_name.' '.$user->last_name,'access_token' => $token, 'token_type' => 'Bearer', ]);
     }
 
     public function verifyEmail($token): string
