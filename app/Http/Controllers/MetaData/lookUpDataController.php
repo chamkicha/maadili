@@ -59,7 +59,7 @@ class lookUpDataController extends Controller
     public function wards($LgaCode): JsonResponse
     {
 
-        $wards = Ward::where('district_code','=',$LgaCode)->get();
+        $wards = Ward::where('district_id','=',$LgaCode)->get();
 
         $response = ['wards' => $wards];
 
@@ -192,7 +192,8 @@ class lookUpDataController extends Controller
         return response()->json($response,200);
     }
 
-    public function uuid(){
+    public function uuid()
+    {
 
         return Str::uuid();
     }

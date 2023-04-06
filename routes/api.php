@@ -26,6 +26,8 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::controller(userDeclarationController::class)->group(function (){
         Route::post('submit/declaration', 'declarationSubmission');
+        Route::get('declaration/preview', 'previewAdf');
+        Route::get('declaration/download', 'downloadAdf');
     });
 });
 

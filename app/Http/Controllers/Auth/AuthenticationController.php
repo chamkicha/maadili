@@ -41,7 +41,7 @@ class AuthenticationController extends Controller
         if (!Auth::attempt($request->only($login_type, 'password')))
         {
             return response()
-                ->json(['statusCode' => 401, 'message' => 'Unauthorized'], 401);
+                ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye '.$login_type.' hyo ayupo kwenye mfumo'], 401);
         }
 
         $user = User::where('nida', $request->username)

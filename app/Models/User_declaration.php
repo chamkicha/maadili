@@ -21,6 +21,12 @@ class User_declaration extends Model
         'flag'
     ];
 
+    public function user(): BelongsTo
+    {
+
+        return $this->belongsTo(User::class,'user_id','id');
+    }
+
     public function declaration_type(): BelongsTo
     {
 
