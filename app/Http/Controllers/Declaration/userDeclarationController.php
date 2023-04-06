@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Declaration;
 
 use App\Http\Controllers\Controller;
+use App\Models\Financial_year;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -111,10 +112,12 @@ class userDeclarationController extends Controller
         $user->sex_id = $request->input('sex');
         $user->save();
 
+        $year = Financial_year::where('is_active','=',1)->first();
+
         $declaration_data = [
             'secure_token' => Str::uuid(),
             'declaration_type_id' => $request->input('declaration_type'),
-            'financial_year_id' => $request->input('financial_year'),
+            'financial_year_id' => $year->year,
             'flag' => 'saved',
         ];
 
