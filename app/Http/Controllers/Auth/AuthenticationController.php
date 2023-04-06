@@ -22,7 +22,7 @@ class AuthenticationController extends Controller
     public function login(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(),[
-            'nida' => 'required',
+            'username' => 'required',
             'password' => 'required',
         ]);
 
@@ -30,13 +30,23 @@ class AuthenticationController extends Controller
             return response()->json($validator->errors());
         }
 
-        if (!Auth::attempt($request->only('nida', 'password')))
+        $login_type = filter_var($request->input('username'), FILTER_VALIDATE_EMAIL )
+            ? 'email'
+            : 'nida';
+
+        $request->merge([
+            $login_type => $request->input('username')
+        ]);
+
+        if (!Auth::attempt($request->only($login_type, 'password')))
         {
             return response()
                 ->json(['statusCode' => 401, 'message' => 'Unauthorized'], 401);
         }
 
-        $user = User::where('nida', $request['nida'])->firstOrFail();
+        $user = User::where('nida', $request->username)
+            ->orWhere('email', $request->username)
+            ->firstOrFail();
 
 //        if ($user->verified_at == null){
 //
