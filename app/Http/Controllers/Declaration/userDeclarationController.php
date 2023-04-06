@@ -232,7 +232,7 @@ class userDeclarationController extends Controller
                     'family_member_id' => $properties['family_member'],
                     'size_of_the_area' => $properties['size_of_the_area'],
                     'value_or_costs_of_construction_or_purchase' => $properties['value_or_costs_of_construction_or_purchase'],
-                    'source_of_income_id' => $properties['source_of_income_id'],
+                    'source_of_income_id' => $properties['source_of_income'],
                     'country_id' => $properties['country'],
                     'region_id' => $properties['region'],
                     'ward_id' => $properties['ward'],
