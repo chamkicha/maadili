@@ -117,7 +117,7 @@ class userDeclarationController extends Controller
         $declaration_data = [
             'secure_token' => Str::uuid(),
             'declaration_type_id' => $request->input('declaration_type'),
-            'financial_year_id' => $year->year,
+            'financial_year_id' => $year->id,
             'flag' => 'saved',
         ];
 
