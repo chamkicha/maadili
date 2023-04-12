@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Requirement;
+use App\Models\Section_requirement;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,10 +15,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('building_types', function (Blueprint $table) {
+        Schema::create('section_requirements', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->string('type');
+            $table->foreignIdFor(Section_requirement::class,'section_requirement_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Requirement::class,'requirement_id')->index()->constrained()->onDelete('cascade');
+            $table->string('table_name')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +32,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('building_types');
+        Schema::dropIfExists('section_requirements');
     }
 };

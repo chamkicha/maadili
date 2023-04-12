@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('abbreviation');
             $table->string('phone');
             $table->string('flag')->nullable();
+            $table->integer('api_id')->nullable();
             $table->timestamps();
         });
     }

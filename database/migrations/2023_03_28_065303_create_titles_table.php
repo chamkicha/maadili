@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('titles', function (Blueprint $table) {
             $table->id();
+            $table->uuid('secure_token');
             $table->string('title');
             $table->string('abbreviation')->nullable();
             $table->timestamps();

@@ -1,7 +1,6 @@
 <?php
 
-use App\Models\Family_member;
-use App\Models\User_declaration;
+use App\Models\Declaration_type;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,12 +14,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('cash_in_hands', function (Blueprint $table) {
+        Schema::create('declaration_sections', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->foreignIdFor(User_declaration::class,'user_declaration_id')->index()->constrained()->onDelete('cascade');
-            $table->foreignIdFor(Family_member::class,'family_member_id')->nullable()->index()->constrained()->onDelete('cascade');
-            $table->float('cash');
+            $table->foreignIdFor(Declaration_type::class,'declaration_type_id')->index()->constrained()->onDelete('cascade');
+            $table->string('section_name');
+            $table->text('description')->nullable();
             $table->timestamps();
         });
     }
@@ -32,6 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cash_in_hands');
+        Schema::dropIfExists('declaration_sections');
     }
 };

@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(District::class,'district_id')->index()->constrained()->onDelete('cascade');
             $table->string('ward_name');
             $table->string('district_code')->nullable();
+            $table->integer('api_id')->nullable();
             $table->timestamps();
         });
     }

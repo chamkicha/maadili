@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Section_requirement;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,8 +14,13 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('districts', function (Blueprint $table) {
-            $table->integer('api_id')->nullable();
+        Schema::create('requirements', function (Blueprint $table) {
+            $table->id();
+            $table->uuid('secure_token');
+            $table->string('label');
+            $table->string('field_name');
+            $table->string('field_type');
+            $table->timestamps();
         });
     }
 
@@ -25,8 +31,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('districts', function (Blueprint $table) {
-            $table->dropColumn('api_id');
-        });
+        Schema::dropIfExists('requirements');
     }
 };

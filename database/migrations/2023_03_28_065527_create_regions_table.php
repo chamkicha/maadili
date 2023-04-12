@@ -19,6 +19,7 @@ return new class extends Migration
             $table->foreignIdFor(Country::class,'country_id')->nullable()->index()->constrained()->onDelete('cascade');
             $table->string('region_name');
             $table->string('region_code')->nullable();
+            $table->integer('api_id')->nullable();
             $table->timestamps();
         });
     }
