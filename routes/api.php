@@ -25,6 +25,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::post('logout',[AuthenticationController::class,'logout']);
 
     Route::controller(userDeclarationController::class)->group(function (){
+        Route::get('declarations', 'declarations');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::get('declaration/preview', 'previewAdf');
         Route::get('declaration/download', 'downloadAdf');

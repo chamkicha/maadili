@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Declaration;
 
 use App\Http\Controllers\Controller;
+use App\Models\Declaration_type;
 use App\Models\Financial_year;
 use App\Models\User;
 use App\Models\User_declaration;
@@ -14,6 +15,22 @@ use Illuminate\Support\Str;
 
 class userDeclarationController extends Controller
 {
+    public function declarations(): JsonResponse
+    {
+
+        $declarations = Declaration_type::with([
+            'sections' => function($query){
+                $query->with([
+                    'requirements.requirement'
+                ]);
+            }
+        ])->get();
+
+        $response = ['declarations' => $declarations];
+
+        return response()->json($response,200);
+
+    }
     public function declarationSubmission(Request $request): JsonResponse|array
     {
 
