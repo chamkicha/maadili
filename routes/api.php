@@ -26,6 +26,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
     Route::controller(userDeclarationController::class)->group(function (){
         Route::get('declarations', 'declarations');
+        Route::get('declaration/form/{secure_token?}', 'declarationForm');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::get('declaration/preview', 'previewAdf');
         Route::get('declaration/download', 'downloadAdf');

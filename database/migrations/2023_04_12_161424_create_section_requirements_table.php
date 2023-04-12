@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Declaration_section;
 use App\Models\Requirement;
 use App\Models\Section_requirement;
 use Illuminate\Database\Migrations\Migration;
@@ -18,7 +19,7 @@ return new class extends Migration
         Schema::create('section_requirements', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->foreignIdFor(Section_requirement::class,'section_requirement_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Declaration_section::class,'declaration_section_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Requirement::class,'requirement_id')->index()->constrained()->onDelete('cascade');
             $table->string('table_name')->nullable();
             $table->timestamps();

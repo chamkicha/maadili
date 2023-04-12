@@ -31,6 +31,24 @@ class userDeclarationController extends Controller
         return response()->json($response,200);
 
     }
+
+    public function declarationForm($secure_token): JsonResponse
+    {
+        $declaration = Declaration_type::with([
+            'sections' => function($query){
+                $query->with([
+                    'requirements.requirement'
+                ]);
+            }
+        ])
+            ->where('secure_token','=',$secure_token)
+            ->first();
+
+        $response = ['declaration' => $declaration];
+
+        return response()->json($response,200);
+    }
+
     public function declarationSubmission(Request $request): JsonResponse|array
     {
 
