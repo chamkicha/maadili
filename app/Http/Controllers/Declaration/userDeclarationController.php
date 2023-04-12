@@ -18,13 +18,7 @@ class userDeclarationController extends Controller
     public function declarations(): JsonResponse
     {
 
-        $declarations = Declaration_type::with([
-            'sections' => function($query){
-                $query->with([
-                    'requirements.requirement'
-                ]);
-            }
-        ])->get();
+        $declarations = Declaration_type::get();
 
         $response = ['declarations' => $declarations];
 
