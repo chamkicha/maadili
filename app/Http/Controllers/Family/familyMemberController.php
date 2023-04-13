@@ -67,4 +67,36 @@ class familyMemberController extends Controller
         $response =  ['statusCode' => 200, 'member' => $member ];
         return response()->json($response);
     }
+
+    public function updateFamilyMember(Request $request, $token): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'family_member_type' => 'required|integer',
+            'sex' => 'required|integer',
+            'first_name' => 'required|string',
+            'middle_name' => 'required|string',
+            'last_name' => 'required|string',
+            'date_of_birth' => 'required|string',
+//            'occupation' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $member = Family_member::where('token','=',$token)->first();
+        $member->family_member_type_id = $request->input('family_member_type');
+        $member->sex_id = $request->input('sex');
+        $member->first_name = $request->input('first_name');
+        $member->middle_name = $request->input('middle_name');
+        $member->last_name = $request->input('last_name');
+        $member->date_of_birth = $request->input('date_of_birth');
+        $member->occupation = $request->input('occupation');
+        $member->save();
+
+        $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kufanya mabadiliko ya mwanafamilia/mtegemezi wako kwenye dirisha lako'];
+        return response()->json($response);
+
+    }
 }
