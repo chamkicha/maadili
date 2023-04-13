@@ -85,7 +85,7 @@ class familyMemberController extends Controller
             return response()->json($validator->errors());
         }
 
-        $member = Family_member::where('token','=',$token)->first();
+        $member = Family_member::where('secure_token','=',$token)->first();
         $member->family_member_type_id = $request->input('family_member_type');
         $member->sex_id = $request->input('sex');
         $member->first_name = $request->input('first_name');
