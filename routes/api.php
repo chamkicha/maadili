@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Auth\AuthenticationController;
 use App\Http\Controllers\Declaration\userDeclarationController;
+use App\Http\Controllers\Family\familyMemberController;
 use App\Http\Controllers\MetaData\lookUpDataController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,6 +31,12 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('submit/declaration', 'declarationSubmission');
         Route::get('declaration/preview', 'previewAdf');
         Route::get('declaration/download', 'downloadAdf');
+    });
+
+    Route::controller(familyMemberController::class)->group(function (){
+        Route::post('register/family-member', 'addFamilyMember');
+        Route::get('family-members', 'getFamilyMembers');
+        Route::get('edit/family-member', 'editFamilyMember');
     });
 });
 
