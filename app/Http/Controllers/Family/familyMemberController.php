@@ -30,17 +30,17 @@ class familyMemberController extends Controller
 
 //        $id = $request->input('id');
 
-        $member = Family_member::updateOrCreate([
-            'secure_token' => Str::uuid(),
-            'user_id' => auth()->user()->id,
-            'family_member_type_id' => $request->input('family_member_type'),
-            'sex_id' => $request->input('sex'),
-            'first_name' => $request->input('first_name'),
-            'middle_name' => $request->input('middle_name'),
-            'last_name' => $request->input('last_name'),
-            'date_of_birth' => $request->input('date_of_birth'),
-            'occupation' => $request->input('occupation')
-        ]);
+        $member = Family_member::updateOrCreate(
+           [ 'secure_token' => Str::uuid()],
+           [ 'user_id' => auth()->user()->id],
+           ['family_member_type_id' => $request->input('family_member_type')],
+           ['sex_id' => $request->input('sex')],
+           ['first_name' => $request->input('first_name')],
+           ['middle_name' => $request->input('middle_name')],
+           ['last_name' => $request->input('last_name')],
+           ['date_of_birth' => $request->input('date_of_birth')],
+           ['occupation' => $request->input('occupation')]
+        );
 
         $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kumsajili mwanafamilia/mtegemezi wako kwenye dirisha lako'];
         return response()->json($response);
