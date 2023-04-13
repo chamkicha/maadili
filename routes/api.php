@@ -36,7 +36,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::controller(familyMemberController::class)->group(function (){
         Route::post('register/family-member', 'addFamilyMember');
         Route::get('family-members', 'getFamilyMembers');
-        Route::get('edit/family-member', 'editFamilyMember');
+        Route::get('edit/family-member/{token?}', 'editFamilyMember');
     });
 });
 
