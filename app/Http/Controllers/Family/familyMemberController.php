@@ -28,10 +28,9 @@ class familyMemberController extends Controller
             return response()->json($validator->errors());
         }
 
-        $id = $request->input('id');
+//        $id = $request->input('id');
 
         $member = Family_member::updateOrCreate([
-            'id' => $id,
             'secure_token' => Str::uuid(),
             'user_id' => auth()->user()->id,
             'family_member_type_id' => $request->input('family_member_type'),
