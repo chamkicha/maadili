@@ -14,7 +14,7 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('building_types', function (Blueprint $table) {
+        Schema::create('office_types', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
             $table->foreignIdFor(Staff::class,'staff_id')->nullable()->index()->constrained()->onDelete('cascade');
@@ -33,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('building_types');
+        Schema::dropIfExists('office_types');
     }
 };

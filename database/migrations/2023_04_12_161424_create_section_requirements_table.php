@@ -2,6 +2,7 @@
 
 use App\Models\Declaration_section;
 use App\Models\Requirement;
+use App\Models\Section;
 use App\Models\Section_requirement;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -19,9 +20,8 @@ return new class extends Migration
         Schema::create('section_requirements', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->foreignIdFor(Declaration_section::class,'declaration_section_id')->index()->constrained()->onDelete('cascade');
+            $table->foreignIdFor(Section::class,'section_id')->index()->constrained()->onDelete('cascade');
             $table->foreignIdFor(Requirement::class,'requirement_id')->index()->constrained()->onDelete('cascade');
-            $table->string('table_name')->nullable();
             $table->timestamps();
         });
     }

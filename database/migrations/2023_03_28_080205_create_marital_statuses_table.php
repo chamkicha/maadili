@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Staff;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,7 +16,10 @@ return new class extends Migration
     {
         Schema::create('marital_statuses', function (Blueprint $table) {
             $table->id();
-            $table->string('marital');
+            $table->uuid('secure_token');
+            $table->foreignIdFor(Staff::class,'staff_id')->nullable()->index()->constrained()->onDelete('cascade');
+            $table->string('marital_en')->nullable();
+            $table->string('marital_sw')->nullable();
             $table->timestamps();
         });
     }

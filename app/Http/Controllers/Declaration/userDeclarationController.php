@@ -26,13 +26,25 @@ class userDeclarationController extends Controller
 
     }
 
+//=> function($query){
+//    $query->with([
+//        'requirements.requirement'
+//    ]);
+//}
+
     public function declarationForm($secure_token): JsonResponse
     {
         $declaration = Declaration_type::with([
             'sections' => function($query){
-                $query->with([
-                    'requirements.requirement'
-                ]);
+              $query->with([
+                  'requirements' => function($qry){
+                    $qry->with([
+                        'requirement' => function($qy){
+                          $qy->select('id','label','field_name','field_type');
+                        }
+                    ])->select('id','section_id','requirement_id');
+                  }
+              ]);
             }
         ])
             ->where('secure_token','=',$secure_token)
@@ -346,8 +358,6 @@ class userDeclarationController extends Controller
             ->where('user_id','=',auth()->user()->id)
             ->where('financial_year_id','=',$year->id)
             ->first();
-
-//        if ()
 
         $response = ['declaration' => $declaration,'year' => $year->year];
 

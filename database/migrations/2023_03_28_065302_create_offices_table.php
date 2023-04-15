@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Office_type;
 use App\Models\Staff;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
@@ -14,12 +15,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('building_types', function (Blueprint $table) {
+        Schema::create('offices', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
             $table->foreignIdFor(Staff::class,'staff_id')->nullable()->index()->constrained()->onDelete('cascade');
-            $table->string('type_en')->nullable();
-            $table->string('type_sw')->nullable();
+            $table->foreignIdFor(Office_type::class,'office_type_id')->nullable()->index()->constrained()->onDelete('cascade');
+            $table->string('office_en')->nullable();
+            $table->string('office_sw')->nullable();
+            $table->string('abbreviation')->nullable();
             $table->timestamp('deleted_at')->nullable();
             $table->boolean('is_active')->default(true);
             $table->timestamps();
@@ -33,6 +36,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('building_types');
+        Schema::dropIfExists('offices');
     }
 };

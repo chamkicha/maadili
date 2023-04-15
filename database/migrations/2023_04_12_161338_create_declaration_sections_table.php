@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Declaration_type;
+use App\Models\Section;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -18,8 +19,7 @@ return new class extends Migration
             $table->id();
             $table->uuid('secure_token');
             $table->foreignIdFor(Declaration_type::class,'declaration_type_id')->index()->constrained()->onDelete('cascade');
-            $table->string('section_name');
-            $table->text('description')->nullable();
+            $table->foreignIdFor(Section::class,'section_id')->index()->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

@@ -13,10 +13,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('offices', function (Blueprint $table) {
+        Schema::create('sections', function (Blueprint $table) {
             $table->id();
-            $table->string('office');
-            $table->string('abbreviation')->nullable();
+            $table->uuid('secure_token');
+            $table->string('section_name');
+            $table->text('description')->nullable();
+            $table->string('table_name')->nullable();
             $table->timestamps();
         });
     }
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('offices');
+        Schema::dropIfExists('sections');
     }
 };
