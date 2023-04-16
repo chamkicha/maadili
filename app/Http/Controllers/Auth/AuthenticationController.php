@@ -3,34 +3,37 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Mail\SendEmailToRegisteredUser;
-use App\Models\Application;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Auth\Events\Registered;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 
 class AuthenticationController extends Controller
 {
 
+    /**
+     * @throws ValidationException
+     * @throws Exception
+     */
     public function login(Request $request): JsonResponse
     {
-        $validator = Validator::make($request->all(),[
+        $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
-        $login_type = filter_var($request->input('username'), FILTER_VALIDATE_EMAIL )
+        $login_type = filter_var($request->input('username'), FILTER_VALIDATE_EMAIL)
             ? 'email'
             : 'nida';
 
@@ -38,33 +41,47 @@ class AuthenticationController extends Controller
             $login_type => $request->input('username')
         ]);
 
-        if (!Auth::attempt($request->only($login_type, 'password')))
-        {
-            return response()
-                ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye '.$login_type.' hyo ayupo kwenye mfumo'], 401);
-        }
+        try {
 
-        $user = User::where('nida', $request->username)
-            ->orWhere('email', $request->username)
-            ->firstOrFail();
+            $this->checkTooManyFailedAttempts();
+
+            if (!Auth::attempt($request->only($login_type, 'password'))) {
+                return response()
+                    ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $login_type . ' hyo ayupo kwenye mfumo'], 401);
+            }
+
+            RateLimiter::clear($this->throttleKey());
+
+            $user = User::where('nida', $request->username)
+                ->orWhere('email', $request->username)
+                ->firstOrFail();
 
 //        if ($user->verified_at == null){
 //
 //            return response()->json(['statusCode' => 401, 'message' => 'Samahani hakiki barua pepe yako ili uweze kuendelea'], 401);
 //        }
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
 
-        return response()
-            ->json(['statusCode' => 200, 'message' => 'Hi '.$user->first_name.' '.$user->middle_name.' '.$user->last_name.', karibu kwenye ODS','user' => $user->first_name.' '.$user->middle_name.' '.$user->last_name,'access_token' => $token, 'token_type' => 'Bearer', ]);
+            return response()
+                ->json(['statusCode' => 200, 'message' => 'Hi ' . $user->first_name . ' ' . $user->middle_name . ' ' . $user->last_name . ', karibu kwenye ODS', 'user' => $user, 'access_token' => $token, 'token_type' => 'Bearer',]);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Error occurred while logging in.',
+                'error' => $error,
+            ]);
+        }
+
     }
 
     public function verifyEmail($token): string
     {
 
-        $verify = User::where('secure_token','=',$token)->first();
+        $verify = User::where('secure_token', '=', $token)->first();
 
-        if ($verify == null){
+        if ($verify == null) {
 
             return "Account yako aitambuliki";
         }
@@ -83,10 +100,11 @@ class AuthenticationController extends Controller
         $response = [
             'message' => 'You have successfully logged out and the token was successfully deleted'
         ];
-        return response()->json($response,200);
+        return response()->json($response, 200);
     }
 
-    private function basic_email($user) {
+    private function basic_email($user)
+    {
 
         $details = [
             'title' => 'Hakiki Barua pepe yako',
@@ -95,5 +113,30 @@ class AuthenticationController extends Controller
         ];
 
         Mail::to($user->email)->send(new SendEmailToRegisteredUser($details));
-   }
+    }
+
+    /**
+     * Get the rate limiting throttle key for the request.
+     *
+     * @return string
+     */
+    public function throttleKey(): string
+    {
+        return Str::lower(request('username')) . '|' . request()->ip();
+    }
+
+    /**
+     * Ensure the login request is not rate limited.
+     *
+     * @return void
+     * @throws Exception
+     */
+    public function checkTooManyFailedAttempts(): void
+    {
+        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
+            return;
+        }
+
+        throw new ValidationException('IP address banned. Too many login attempts.');
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Declaration;
 
 use App\Http\Controllers\Controller;
+use App\Models\Asset_declaration_window;
 use App\Models\Declaration_type;
 use App\Models\Financial_year;
 use App\Models\User;
@@ -18,9 +19,15 @@ class userDeclarationController extends Controller
     public function declarations(): JsonResponse
     {
 
-        $declarations = Declaration_type::get();
+        $declaration_window = Asset_declaration_window::with([
+            'declarations'
+        ])
+            ->where('is_active','=',true)
+            ->get();
 
-        $response = ['declarations' => $declarations];
+//        $declarations = Declaration_type::get();
+
+        $response = ['declaration_window' => $declaration_window];
 
         return response()->json($response,200);
 
