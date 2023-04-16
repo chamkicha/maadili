@@ -20,9 +20,12 @@ class userDeclarationController extends Controller
     {
 
         $declaration_window = Asset_declaration_window::with([
-            'declarations'
+            'declarations' => function($query){
+               $query->select('id','secure_token','type');
+            }
         ])
             ->where('is_active','=',true)
+            ->select('id','declaration_type_id','is_active')
             ->get();
 
 //        $declarations = Declaration_type::get();
