@@ -80,7 +80,7 @@ class userDeclarationController extends Controller
             return response()->json($validator->errors());
         }
 
-        try {
+//        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             $year = Financial_year::where('is_active','=',true)->first();
@@ -135,13 +135,13 @@ class userDeclarationController extends Controller
             $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
 
             return response()->json($response);
-        }catch (Exception $error) {
-            return response()->json([
-                'statusCode' => 402,
-                'message' => 'Something went wrong.',
-                'error' => $error,
-            ]);
-        }
+//        }catch (Exception $error) {
+//            return response()->json([
+//                'statusCode' => 402,
+//                'message' => 'Something went wrong.',
+//                'error' => $error,
+//            ]);
+//        }
 
 
     }
