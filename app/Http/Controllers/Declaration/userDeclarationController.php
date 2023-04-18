@@ -8,7 +8,7 @@ use App\Models\Declaration_type;
 use App\Models\Financial_year;
 use App\Models\User;
 use App\Models\User_declaration;
-use ErrorException;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,7 +80,7 @@ class userDeclarationController extends Controller
             return response()->json($validator->errors());
         }
 
-        try {
+//        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             $year = Financial_year::where('is_active','=',true)->first();
@@ -135,13 +135,13 @@ class userDeclarationController extends Controller
             $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
 
             return response()->json($response);
-        }catch (ErrorException $error) {
-            return response()->json([
-                'statusCode' => 402,
-                'message' => 'Something went wrong.',
-                'error' => $error,
-            ]);
-        }
+//        }catch (Exception $error) {
+//            return response()->json([
+//                'statusCode' => 402,
+//                'message' => 'Something went wrong.',
+//                'error' => $error,
+//            ]);
+//        }
 
 
     }
