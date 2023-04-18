@@ -168,13 +168,13 @@ class userDeclarationController extends Controller
 
             if (count($section['section']['data']) > 0) {
 
-                foreach ($section['section']['data'] as $values){
+//                foreach ($section['section']['data'] as $values){
 
                         DB::table(strtolower($section['section']['table']))->Insert([
-                            'user_decralation_id' => $check->id,
-                            json_encode($values)
+                            ['user_decralation_id' => $check->id],
+                            $section['section']['data']
                         ]);
-                }
+//                }
             }
         }
 
