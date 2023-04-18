@@ -27,6 +27,7 @@ class passwordUpdateController extends Controller
 
             $user = User::find(Auth::id());
             $user->password = Hash::make($request->password);
+            $user->is_password_changed = true;
             $user->save();
 
             $response = [

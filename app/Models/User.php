@@ -33,6 +33,7 @@ class User extends Authenticatable
         'date_of_birth',
         'email',
         'password',
+        'is_password_changed',
     ];
 
     /**
