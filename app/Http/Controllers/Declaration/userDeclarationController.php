@@ -172,6 +172,7 @@ class userDeclarationController extends Controller
 
                     foreach ($values as $value) {
 
+                        return $value;
                         DB::table(strtolower($section['section']['table']))->Insert([
                             'user_decralation_id' => $check->id,
                             $value
