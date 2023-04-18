@@ -103,37 +103,12 @@ class userDeclarationController extends Controller
                     'flag' => $request->input('flag')
                 ]);
 
-                foreach ($sections as $section){
-
-                    if (count($section['section']['data']) > 0){
-                        DB::table($section->section->table)->updateOrInsert(
-                            $section['section']['data'],
-                            ['user_declaration_id' => $user_declaration->id]
-                        );
-                    }
-                }
-
-
-                $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
-
-                return response()->json($response);
+                return $this->insertSections($sections, $user_declaration);
 
             }
 
 
-            foreach ($sections as $section){
-
-                if (count($section['section']['data']) > 0) {
-                    DB::table($section->section->table)->updateOrInsert(
-                        $section['section']['data'],
-                        ['user_declaration_id' => $check->id]
-                    );
-                }
-            }
-
-            $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
-
-            return response()->json($response);
+        return $this->insertSections($sections, $check);
 //        }catch (Exception $error) {
 //            return response()->json([
 //                'statusCode' => 402,
@@ -180,6 +155,28 @@ class userDeclarationController extends Controller
     private function generateAdfNumber($declarationCode,$year): string
     {
         return 'ADF'.'-'.$declarationCode.'-'.$year.'-'.mt_rand(100,999);
+    }
+
+    /**
+     * @param mixed $sections
+     * @param $check
+     * @return JsonResponse
+     */
+    private function insertSections(mixed $sections, $check): JsonResponse
+    {
+        foreach ($sections as $section) {
+
+            if (count($section['section']['data']) > 0) {
+                DB::table($section['section']['table'])->updateOrInsert(
+                    $section['section']['data'],
+                    ['user_declaration_id' => $check->id]
+                );
+            }
+        }
+
+        $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
+
+        return response()->json($response);
     }
 
 }
