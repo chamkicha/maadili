@@ -160,18 +160,22 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return JsonResponse
+     * @return string
      */
-    private function insertSections(mixed $sections, $check): JsonResponse
+    private function insertSections(mixed $sections, $check): string
     {
         foreach ($sections as $section) {
 
             if (count($section['section']['data']) > 0) {
 
-                DB::table(strtolower($section['section']['table']))->Insert([
-                    ['user_declaration_id' => $check->id],
-                    $section['section']['data']
-                ]);
+                foreach ($section['section']['data'] as $value){
+
+                    return $value;
+                    DB::table(strtolower($section['section']['table']))->Insert([
+                        'user_declaration_id' => $check->id,
+                        $value
+                    ]);
+                }
             }
         }
 
