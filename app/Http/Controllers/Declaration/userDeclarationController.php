@@ -170,14 +170,10 @@ class userDeclarationController extends Controller
 
                 foreach ($section['section']['data'] as $values){
 
-                    foreach ($values as $value) {
-
-                        return $value;
                         DB::table(strtolower($section['section']['table']))->Insert([
                             'user_decralation_id' => $check->id,
-                            $value
+                            $values
                         ]);
-                    }
                 }
             }
         }
