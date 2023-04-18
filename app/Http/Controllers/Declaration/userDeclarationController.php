@@ -168,7 +168,7 @@ class userDeclarationController extends Controller
 
             if (count($section['section']['data']) > 0) {
 
-                return json_decode(json_encode( $section['section']['data']));
+                return json_decode(json_encode( $section['section']['data']),true);
                 DB::table($section['section']['table'])->updateOrInsert(
                     $section['section']['data'],
                     ['user_declaration_id' => $check->id]
