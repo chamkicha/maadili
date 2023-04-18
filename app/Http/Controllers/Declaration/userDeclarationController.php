@@ -52,7 +52,7 @@ class userDeclarationController extends Controller
                         'requirement' => function($qy){
                           $qy->select('id','label','field_name','field_type');
                         }
-                    ])->select('id','section_id','requirement_id','table_name');
+                    ])->select('id','section_id','requirement_id');
                   }
               ]);
             }
