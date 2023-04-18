@@ -71,9 +71,9 @@ class userDeclarationController extends Controller
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
             'sections' => 'required|array',
-            'sections.*.section' => 'required|array',
-            'sections.*.section.*.table' => 'required|string',
-            'sections.*.section.*.data' => 'required|array',
+//            'sections.*.section' => 'required|array',
+//            'sections.*.section.*.table' => 'required|string',
+//            'sections.*.section.*.data' => 'required|array',
         ]);
 
         if ($validator->fails()) {
