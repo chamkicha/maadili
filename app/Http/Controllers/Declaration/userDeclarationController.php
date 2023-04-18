@@ -160,14 +160,15 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return array
+     * @return string
      */
-    private function insertSections(mixed $sections, $check): array
+    private function insertSections(mixed $sections, $check): string
     {
         foreach ($sections as $section) {
 
             if (count($section['section']['data']) > 0) {
 
+                return strtolower($section['section']['table']);
 
                 DB::table(strtolower($section['section']['table']))->Insert(
                     json_decode(json_encode( $section['section']['data']),true)
