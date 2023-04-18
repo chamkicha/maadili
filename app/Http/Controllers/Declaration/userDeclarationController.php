@@ -168,7 +168,7 @@ class userDeclarationController extends Controller
 
             if (count($section['section']['data']) > 0) {
 
-                return $section['section']['data'];
+                return \GuzzleHttp\json_decode( $section['section']['data']);
                 DB::table($section['section']['table'])->updateOrInsert(
                     $section['section']['data'],
                     ['user_declaration_id' => $check->id]
