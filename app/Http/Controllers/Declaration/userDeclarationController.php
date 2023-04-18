@@ -178,6 +178,7 @@ class userDeclarationController extends Controller
                     $array = $object;
                 }
 
+                return $array;
                 DB::table(strtolower($section['section']['table']))->Insert([
                     ['user_decralation_id' => $check->id],
                     $array
