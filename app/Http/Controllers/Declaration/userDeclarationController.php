@@ -175,10 +175,10 @@ class userDeclarationController extends Controller
                     $array = $values;
                 }
 
-                return $array;
+//                return $array;
                 DB::table(strtolower($section['section']['table']))->Insert([
                     ['user_decralation_id' => $check->id],
-                    $section['section']['data']
+                    $array
                 ]);
             }
         }
