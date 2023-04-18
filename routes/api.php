@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthenticationController;
+use App\Http\Controllers\Auth\passwordUpdateController;
 use App\Http\Controllers\Declaration\userDeclarationController;
 use App\Http\Controllers\Family\familyMemberController;
 use App\Http\Controllers\MetaData\lookUpDataController;
@@ -24,6 +25,12 @@ Route::middleware('auth:sanctum')->group( function () {
         return $request->user();
     });
     Route::post('logout',[AuthenticationController::class,'logout']);
+
+    Route::controller(passwordUpdateController::class)->group(function (){
+        Route::post('new-password', 'createNewPassword');
+        Route::post('update-password', 'updatePassword');
+        Route::post('upload-nida', 'nidaNumberUpdate');
+    });
 
     Route::controller(userDeclarationController::class)->group(function (){
         Route::get('declarations', 'declarations');
