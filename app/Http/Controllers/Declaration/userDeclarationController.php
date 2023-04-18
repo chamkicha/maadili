@@ -8,6 +8,7 @@ use App\Models\Declaration_type;
 use App\Models\Financial_year;
 use App\Models\User;
 use App\Models\User_declaration;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -79,60 +80,68 @@ class userDeclarationController extends Controller
             return response()->json($validator->errors());
         }
 
-        $declaration = Declaration_type::find($request->input('declaration_type'));
+        try {
+            $declaration = Declaration_type::find($request->input('declaration_type'));
 
-        $year = Financial_year::where('is_active','=',true)->first();
+            $year = Financial_year::where('is_active','=',true)->first();
 
-        $check =  User_declaration::where('user_id','=',auth()->user()->id)
-           ->where('financial_year_id','=',$year->id)
-           ->where('declaration_type_id','=',$declaration->id)
-           ->first();
+            $check =  User_declaration::where('user_id','=',auth()->user()->id)
+                ->where('financial_year_id','=',$year->id)
+                ->where('declaration_type_id','=',$declaration->id)
+                ->first();
 
-        $sections = $request->input('sections');
+            $sections = $request->input('sections');
 
-        if ($check == null){
+            if ($check == null){
 
-            $user_declaration = User_declaration::create([
-                'secure_token' => Str::uuid(),
-                'user_id' => auth()->user()->id,
-                'declaration_type_id' => $declaration->id,
-                'adf_number' => $this->generateAdfNumber($declaration->declaration_code,$year->year),
-                'financial_year_id' => $year->id,
-                'flag' => $request->input('flag')
-            ]);
+                $user_declaration = User_declaration::create([
+                    'secure_token' => Str::uuid(),
+                    'user_id' => auth()->user()->id,
+                    'declaration_type_id' => $declaration->id,
+                    'adf_number' => $this->generateAdfNumber($declaration->declaration_code,$year->year),
+                    'financial_year_id' => $year->id,
+                    'flag' => $request->input('flag')
+                ]);
+
+                foreach ($sections as $section){
+
+                    if (count($section->section->data) > 0){
+                        DB::table($section->section->table)->updateOrInsert(
+                            $section->section->data,
+                            ['user_declaration_id' => $user_declaration->id]
+                        );
+                    }
+                }
+
+
+                $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
+
+                return response()->json($response);
+
+            }
+
 
             foreach ($sections as $section){
 
-                if (count($section->section->data) > 0){
+                return $section->table;
+                if (count($section->section->data) > 0) {
                     DB::table($section->section->table)->updateOrInsert(
                         $section->section->data,
-                        ['user_declaration_id' => $user_declaration->id]
+                        ['user_declaration_id' => $check->id]
                     );
                 }
             }
 
-
             $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
 
             return response()->json($response);
-
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
         }
-
-
-        foreach ($sections as $section){
-
-            return $section->table;
-            if (count($section->section->data) > 0) {
-                DB::table($section->section->table)->updateOrInsert(
-                    $section->section->data,
-                    ['user_declaration_id' => $check->id]
-                );
-            }
-        }
-
-        $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
-
-        return response()->json($response);
 
 
     }
