@@ -90,8 +90,6 @@ class userDeclarationController extends Controller
                 ->where('declaration_type_id','=',$declaration->id)
                 ->first();
 
-            return $check;
-
             $sections = $request->input('sections');
 
             if ($check == null){
@@ -162,9 +160,9 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return array
+     * @return JsonResponse
      */
-    private function insertSections(mixed $sections, $check): array
+    private function insertSections(mixed $sections, $check): JsonResponse
     {
 
         $array = [];
