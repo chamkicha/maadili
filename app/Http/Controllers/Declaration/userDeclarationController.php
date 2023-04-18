@@ -168,6 +168,7 @@ class userDeclarationController extends Controller
 
             if (count($section['section']['data']) > 0) {
 
+                return count($section['section']['data']);
 
                 foreach ($section['section']['data'] as $value){
 
