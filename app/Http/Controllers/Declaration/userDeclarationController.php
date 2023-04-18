@@ -170,7 +170,7 @@ class userDeclarationController extends Controller
 
                 DB::table(strtolower($section['section']['table']))->Insert([
                     ['user_declaration_id' => $check->id],
-                    json_decode($section['section']['data'])
+                    $section['section']['data']
                 ]);
             }
         }
