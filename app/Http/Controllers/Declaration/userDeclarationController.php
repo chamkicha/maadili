@@ -123,8 +123,8 @@ class userDeclarationController extends Controller
 
             foreach ($sections as $section){
 
-                return $section->table;
-                if (count($section->section->data) > 0) {
+                return $section->section['table'];
+                if (count($section->section['data']) > 0) {
                     DB::table($section->section->table)->updateOrInsert(
                         $section->section->data,
                         ['user_declaration_id' => $check->id]
