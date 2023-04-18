@@ -67,7 +67,7 @@ class userDeclarationController extends Controller
         return response()->json($response,200);
     }
 
-    public function declarationSubmission(Request $request): JsonResponse|array
+    public function declarationSubmission(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
