@@ -11,6 +11,7 @@ use App\Models\User_declaration;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -71,16 +72,61 @@ class userDeclarationController extends Controller
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
             'sections' => 'required|array',
-//            'sections.*.section' => 'required|array',
-//            'sections.*.section.*.table' => 'required|string',
-//            'sections.*.section.*.data' => 'required|array',
+            'flag' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
 
-        return response()->json($request->all());
+        $declaration = Declaration_type::find($request->input('declaration_type'));
+
+        $year = Financial_year::where('is_active','=',true)->first();
+
+        $check =  User_declaration::where('user_id','=',auth()->user()->id)
+           ->where('financial_year_id','=',$year->id)
+           ->where('declaration_type_id','=',$declaration->id)
+           ->first();
+
+        $sections = $request->input('sections');
+
+        if ($check == null){
+
+            $user_declaration = User_declaration::create([
+                'secure_token' => Str::uuid(),
+                'user_id' => auth()->user()->id,
+                'declaration_type_id' => $declaration->id,
+                'adf_number' => $this->generateAdfNumber($declaration->declaration_code,$year->year),
+                'financial_year_id' => $year->id,
+                'flag' => $request->input('flag')
+            ]);
+
+            foreach ($sections as $section){
+
+                if (count($section->section->data) > 0){
+                    DB::table($section->section->table)->updateOrInsert(
+                        $section->section->data,
+                        ['user_declaration_id' => $user_declaration->id]
+                    );
+                }
+            }
+
+
+            $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
+
+            return response()->json($response);
+
+        }
+
+
+        foreach ($sections as $section){
+            if (count($section->section->data) > 0) {
+                DB::table($section->section->table)->updateOrInsert(
+                    $section->section->data,
+                    ['user_declaration_id' => $check->id]
+                );
+            }
+        }
 
         $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
 
@@ -119,6 +165,11 @@ class userDeclarationController extends Controller
         $response = ['declaration' => $declaration,'year' => $year->year];
 
         return response()->json($response,200);
+    }
+
+    private function generateAdfNumber($declarationCode,$year): string
+    {
+        return 'ADF'.'-'.$declarationCode.'-'.$year.'-'.mt_rand(100,999);
     }
 
 }
