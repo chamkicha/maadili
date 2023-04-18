@@ -160,9 +160,9 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return string
+     * @return array
      */
-    private function insertSections(mixed $sections, $check): string
+    private function insertSections(mixed $sections, $check): array
     {
         foreach ($sections as $section) {
 
