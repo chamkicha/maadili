@@ -168,11 +168,9 @@ class userDeclarationController extends Controller
 
             if (count($section['section']['data']) > 0) {
 
-                return count($section['section']['data']);
-
                 foreach ($section['section']['data'] as $value){
 
-                    return gettype($value);
+                    return count($value);
 
                     DB::table(strtolower($section['section']['table']))->Insert([
                         'user_declaration_id' => $check->id,
