@@ -160,15 +160,13 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return string
+     * @return JsonResponse
      */
-    private function insertSections(mixed $sections, $check): string
+    private function insertSections(mixed $sections, $check): JsonResponse
     {
         foreach ($sections as $section) {
 
             if (count($section['section']['data']) > 0) {
-
-                return strtolower($section['section']['table']);
 
                 DB::table(strtolower($section['section']['table']))->Insert(
                     json_decode(json_encode( $section['section']['data']),true)
@@ -176,9 +174,9 @@ class userDeclarationController extends Controller
             }
         }
 
-//        $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
-//
-//        return response()->json($response);
+        $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
+
+        return response()->json($response);
     }
 
 }
