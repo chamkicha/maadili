@@ -160,9 +160,9 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return JsonResponse
+     * @return array|object
      */
-    private function insertSections(mixed $sections, $check): JsonResponse
+    private function insertSections(mixed $sections, $check): array|object
     {
 
         $array = [];
@@ -172,10 +172,13 @@ class userDeclarationController extends Controller
 
                 foreach ($section['section']['data'] as $values){
 
-                    $array = $values;
+                    $object = (object)[
+                        $values
+                    ];
+                    $array = $object;
                 }
 
-//                return $array;
+                return $array;
                 DB::table(strtolower($section['section']['table']))->Insert([
                     'user_decralation_id' => $check->id,
                     $array
