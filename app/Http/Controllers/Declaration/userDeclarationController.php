@@ -90,6 +90,8 @@ class userDeclarationController extends Controller
                 ->where('declaration_type_id','=',$declaration->id)
                 ->first();
 
+            return $check;
+
             $sections = $request->input('sections');
 
             if ($check == null){
