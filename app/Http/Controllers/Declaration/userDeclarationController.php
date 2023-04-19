@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use stdClass;
 
 class userDeclarationController extends Controller
 {
@@ -76,9 +77,13 @@ class userDeclarationController extends Controller
             'flag' => 'required|string',
         ]);
 
+
+
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
+
+//        return response()->json($request->input('sections')[0]['section']['data']);
 
 //        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
@@ -160,29 +165,28 @@ class userDeclarationController extends Controller
     /**
      * @param mixed $sections
      * @param $check
-     * @return array|object
+     * @return JsonResponse
      */
-    private function insertSections(mixed $sections, $check): array|object
+    private function insertSections(mixed $sections, $check): JsonResponse
     {
 
-        $array = [];
         foreach ($sections as $section) {
+
 
             if (count($section['section']['data']) > 0) {
 
                 foreach ($section['section']['data'] as $values){
 
-                    $object = (object)[
-                        $values
-                    ];
-                    $array = $object;
+                    foreach ($values as $key => $value)
+                    {
+                        DB::table(strtolower($section['section']['table']))->insert([
+                            'user_declaration_id' => $check->id,
+                            $key => $value
+                        ]);
+                    }
+
                 }
 
-                return $array;
-                DB::table(strtolower($section['section']['table']))->Insert([
-                    ['user_decralation_id' => $check->id],
-                    $array
-                ]);
             }
         }
 
