@@ -52,7 +52,8 @@ class AuthenticationController extends Controller
 
             RateLimiter::clear($this->throttleKey());
 
-            $user = User::where('nida', $request->username)
+            $user = User::withCount('declarations')
+                ->where('nida', $request->username)
                 ->orWhere('email', $request->username)
                 ->firstOrFail();
 
