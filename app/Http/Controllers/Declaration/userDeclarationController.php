@@ -181,7 +181,7 @@ class userDeclarationController extends Controller
 
                     $new_object = new stdClass();
                     $object = new stdClass();
-                    $object->user_decralation_id = $check->id;
+                    $object->user_declaration_id = $check->id;
                     foreach ($values as $key => $value)
                     {
                         $object->$key = $value;
