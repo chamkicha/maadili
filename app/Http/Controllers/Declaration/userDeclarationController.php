@@ -175,6 +175,7 @@ class userDeclarationController extends Controller
         foreach ($sections as $section) {
 
 
+            $table = strtolower($section['section']['table']);
             if (count($section['section']['data']) > 0) {
 
                 foreach ($section['section']['data'] as $values){
@@ -191,12 +192,9 @@ class userDeclarationController extends Controller
                     $array[] =  $new_object;
 
                     $encode = json_encode($array,1);
-                    $decode = json_decode($encode,true);
-//                    echo var_dump($encode);
-//                    echo var_dump($decode);
-//                    dd($decode);
+                    $row = json_decode($encode,true);
 
-                    DB::table(strtolower($section['section']['table']))->insert($decode);
+                    DB::table($table)->insert($row);
 
                 }
 
