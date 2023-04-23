@@ -170,7 +170,7 @@ class userDeclarationController extends Controller
             'password' => encrypt($this->generateADFPassword())
         ]);
 
-        $response = ['password' => base64_decode($download->password)];
+        $response = ['password' => decrypt($download->password)];
 
         return response()->json($response,200);
     }
