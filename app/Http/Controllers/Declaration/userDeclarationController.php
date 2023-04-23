@@ -69,7 +69,7 @@ class userDeclarationController extends Controller
         return response()->json($response,200);
     }
 
-    public function declarationSubmission(Request $request)
+    public function declarationSubmission(Request $request): JsonResponse
     {
 
         $validator = Validator::make($request->all(), [
@@ -83,8 +83,6 @@ class userDeclarationController extends Controller
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-
-//        return response()->json($request->input('sections')[0]['section']['data']);
 
         try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
@@ -160,7 +158,8 @@ class userDeclarationController extends Controller
         return response()->json($response,200);
     }
 
-    public function downloadAdf(Request $request){
+    public function downloadAdf(Request $request): JsonResponse
+    {
 
         $user_declaration = $request->input('user_declaration');
 
