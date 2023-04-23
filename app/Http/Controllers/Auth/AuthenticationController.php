@@ -33,28 +33,43 @@ class AuthenticationController extends Controller
             return response()->json($validator->errors());
         }
 
-        $login_type = filter_var($request->input('username'), FILTER_VALIDATE_EMAIL)
-            ? 'email'
-            : 'nida';
+        $login_type = filter_var($request->input('username'), FILTER_SANITIZE_NUMBER_INT);
+
+
+        $phone_to_check = str_replace("-", "", $login_type);
+
+
+        if (strlen($phone_to_check) >= 9 && strlen($phone_to_check) <= 13) {
+
+            $user_name =  "phone_number";
+        } elseif (strlen($phone_to_check) > 13) {
+
+            $user_name = "nida";
+        }
+        else{
+
+            return response()
+                ->json(['statusCode' => 401, 'message' => 'Username ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza username sahihi.'], 401);
+        }
 
         $request->merge([
-            $login_type => $request->input('username')
+            $user_name => $request->input('username')
         ]);
 
         try {
 
             $this->checkTooManyFailedAttempts();
 
-            if (!Auth::attempt($request->only($login_type, 'password'))) {
+            if (!Auth::attempt($request->only($user_name, 'password'))) {
                 return response()
-                    ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $login_type . ' hyo ayupo kwenye mfumo'], 401);
+                    ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $user_name . ' hyo ayupo kwenye mfumo'], 401);
             }
 
             RateLimiter::clear($this->throttleKey());
 
             $user = User::withCount('declarations')
                 ->where('nida', $request->username)
-                ->orWhere('email', $request->username)
+                ->orWhere('phone_number', $request->username)
                 ->firstOrFail();
 
 //        if ($user->verified_at == null){
