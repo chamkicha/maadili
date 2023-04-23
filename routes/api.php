@@ -5,6 +5,7 @@ use App\Http\Controllers\Auth\passwordUpdateController;
 use App\Http\Controllers\Declaration\userDeclarationController;
 use App\Http\Controllers\Family\familyMemberController;
 use App\Http\Controllers\MetaData\lookUpDataController;
+use App\Http\Controllers\Notification\notificationController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,4 +68,8 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::get('transport-types', 'transportTypes');
     Route::get('debt-types', 'debtTypes');
     Route::get('uuid', 'uuid');
+});
+
+Route::controller(notificationController::class)->group(function () {
+    Route::get('notifications', 'showNotifications');
 });
