@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Declaration;
 
 use App\Http\Controllers\Controller;
 use App\Models\Asset_declaration_window;
+use App\Models\Declaration_download;
 use App\Models\Declaration_type;
 use App\Models\Financial_year;
 use App\Models\User;
@@ -85,7 +86,7 @@ class userDeclarationController extends Controller
 
 //        return response()->json($request->input('sections')[0]['section']['data']);
 
-//        try {
+        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             $year = Financial_year::where('is_active','=',true)->first();
@@ -112,15 +113,14 @@ class userDeclarationController extends Controller
 
             }
 
-
         return $this->insertSections($sections, $check);
-//        }catch (Exception $error) {
-//            return response()->json([
-//                'statusCode' => 402,
-//                'message' => 'Something went wrong.',
-//                'error' => $error,
-//            ]);
-//        }
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
 
 
     }
@@ -131,28 +131,47 @@ class userDeclarationController extends Controller
         $year = Financial_year::where('is_active','=',1)->first();
 
         $declaration = User_declaration::with([
-            'declaration_type',
-            'user',
-            'employments' => function($query){
+            'declaration_type' => function ($query){
                $query->with([
-                   'title',
-                   'office',
-                   'employment_type'
+                   'sections' => function($qry){
+                      $qry->select('section_name','table_name');
+
+                   }
                ]);
             },
-            'cashes',
-            'banks',
-            'share_and_dividends',
-            'house_and_buildings',
-            'properties',
-            'transportations',
-            'debts'
+            'user' => function($query){
+               $query->select('id','file_number','first_name','middle_name','last_name','nida','phone_number');
+            },
         ])
             ->where('user_id','=',auth()->user()->id)
             ->where('financial_year_id','=',$year->id)
             ->first();
 
+        foreach ($declaration->declaration_type->sections as $section){
+
+              $data = DB::table(strtolower($section->table_name))
+                         ->get();
+
+              $section->section_data = $data;
+        }
+
         $response = ['declaration' => $declaration,'year' => $year->year];
+
+        return response()->json($response,200);
+    }
+
+    public function downloadAdf(Request $request){
+
+        $user_declaration = $request->input('user_declaration');
+
+        $download = Declaration_download::create([
+            'secure_token' => Str::uuid(),
+            'downloader_secure_token' => auth()->user()->secure_token,
+            'user_declaration_id' => $user_declaration,
+            'password' => base64_encode($this->generateADFPassword())
+        ]);
+
+        $response = ['password' => base64_decode($download->password)];
 
         return response()->json($response,200);
     }
@@ -160,6 +179,12 @@ class userDeclarationController extends Controller
     private function generateAdfNumber($declarationCode,$year): string
     {
         return 'ADF'.'-'.$declarationCode.'-'.$year.'-'.mt_rand(100,999);
+    }
+
+    private function generateADFPassword(): string
+    {
+
+        return Str::random(10);
     }
 
     /**
