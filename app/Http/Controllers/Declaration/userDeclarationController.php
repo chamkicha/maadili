@@ -167,7 +167,7 @@ class userDeclarationController extends Controller
             'secure_token' => Str::uuid(),
             'downloader_secure_token' => auth()->user()->secure_token,
             'user_declaration_id' => $user_declaration,
-            'password' => base64_encode($this->generateADFPassword())
+            'password' => encrypt($this->generateADFPassword())
         ]);
 
         $response = ['password' => base64_decode($download->password)];
