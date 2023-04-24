@@ -60,9 +60,7 @@ class userDeclarationController extends Controller
     {
 
         $requirements = Section::with([
-            'requirements' => function ($qy) {
-                $qy->select('id', 'label', 'field_name', 'field_type');
-            }
+            'requirements'
         ])
             ->where('secure_token','=',$secure_token)
             ->first();
