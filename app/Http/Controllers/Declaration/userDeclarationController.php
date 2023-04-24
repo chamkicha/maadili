@@ -60,7 +60,7 @@ class userDeclarationController extends Controller
     {
 
         $requirements = Section::with([
-            'requirement' => function ($qy) {
+            'requirements' => function ($qy) {
                 $qy->select('id', 'label', 'field_name', 'field_type');
             }
         ])
