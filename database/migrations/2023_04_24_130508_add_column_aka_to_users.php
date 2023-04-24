@@ -15,6 +15,8 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('aka')->nullable();
+            $table->unsignedBigInteger('birth_ward_id')->index();
+            $table->foreign('birth_ward_id')->references('id')->on('wards')->onDelete('cascade');
         });
     }
 
@@ -27,6 +29,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('aka');
+            $table->dropColumn('birth_ward_id');
         });
     }
 };

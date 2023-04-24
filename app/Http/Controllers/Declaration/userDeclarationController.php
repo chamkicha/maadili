@@ -59,7 +59,7 @@ class userDeclarationController extends Controller
     public function sectionRequirementsForm($secure_token): JsonResponse
     {
 
-        $requirements = Section::with([
+        $section = Section::with([
             'requirements' => function($query){
                $query->with([
                    'requirement' => function($qry){
@@ -72,7 +72,7 @@ class userDeclarationController extends Controller
             ->where('secure_token','=',$secure_token)
             ->first();
 
-        $response = ['requirements' => $requirements];
+        $response = ['section' => $section];
 
         return response()->json($response, 200);
     }
