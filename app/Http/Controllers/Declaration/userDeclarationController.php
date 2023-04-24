@@ -60,7 +60,7 @@ class userDeclarationController extends Controller
     {
 
         $requirements = Section::with([
-            'requirements'
+            'requirements.requirement'
         ])
             ->where('secure_token','=',$secure_token)
             ->first();
