@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->string('aka')->nullable();
-            $table->unsignedBigInteger('birth_ward_id')->index();
+            $table->unsignedBigInteger('birth_ward_id')->nullable()->index();
             $table->foreign('birth_ward_id')->references('id')->on('wards')->onDelete('cascade');
         });
     }
