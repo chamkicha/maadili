@@ -37,7 +37,7 @@ class userDeclarationController extends Controller
 
 //        $declarations = Declaration_type::get();
 
-        $response = ['declaration_window' => $declaration_window];
+        $response = ['statusCode' => 200, 'declaration_window' => $declaration_window];
 
         return response()->json($response, 200);
 
@@ -51,7 +51,7 @@ class userDeclarationController extends Controller
             ->where('secure_token', '=', $secure_token)
             ->first();
 
-        $response = ['declaration' => $declaration];
+        $response = ['statusCode' => 200,'declaration' => $declaration];
 
         return response()->json($response, 200);
     }
@@ -72,7 +72,7 @@ class userDeclarationController extends Controller
             ->where('secure_token','=',$secure_token)
             ->first();
 
-        $response = ['section' => $section];
+        $response = ['statusCode' => 200, 'section' => $section];
 
         return response()->json($response, 200);
     }
@@ -160,7 +160,7 @@ class userDeclarationController extends Controller
             $section->section_data = $data;
         }
 
-        $response = ['declaration' => $declaration, 'year' => $year->year];
+        $response = ['statusCode' => 200, 'declaration' => $declaration, 'year' => $year->year];
 
         return response()->json($response, 200);
     }
@@ -177,7 +177,7 @@ class userDeclarationController extends Controller
             'password' => encrypt($this->generateADFPassword())
         ]);
 
-        $response = ['password' => decrypt($download->password)];
+        $response = ['statusCode' => 200, 'password' => decrypt($download->password)];
 
         return response()->json($response, 200);
     }
