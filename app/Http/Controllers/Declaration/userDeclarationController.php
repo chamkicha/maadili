@@ -8,6 +8,7 @@ use App\Models\Declaration_download;
 use App\Models\Declaration_section;
 use App\Models\Declaration_type;
 use App\Models\Financial_year;
+use App\Models\Section;
 use App\Models\Section_requirement;
 use App\Models\User;
 use App\Models\User_declaration;
@@ -58,7 +59,7 @@ class userDeclarationController extends Controller
     public function sectionRequirementsForm($secure_token): JsonResponse
     {
 
-        $requirements = Section_requirement::where('secure_token','=',$secure_token)
+        $requirements = Section::where('secure_token','=',$secure_token)
             ->with([
             'requirement' => function ($qy) {
                 $qy->select('id', 'label', 'field_name', 'field_type');
