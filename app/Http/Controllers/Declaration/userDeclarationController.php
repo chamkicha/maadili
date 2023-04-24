@@ -59,12 +59,13 @@ class userDeclarationController extends Controller
     public function sectionRequirementsForm($secure_token): JsonResponse
     {
 
-        $requirements = Section::where('secure_token','=',$secure_token)
-            ->with([
+        $requirements = Section::with([
             'requirement' => function ($qy) {
                 $qy->select('id', 'label', 'field_name', 'field_type');
             }
-        ]);
+        ])
+            ->where('secure_token','=',$secure_token)
+            ->first();
 
         $response = ['requirements' => $requirements];
 
