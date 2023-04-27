@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Notification_category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,12 +13,10 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('notifications', function (Blueprint $table) {
+        Schema::create('notification_categories', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->foreignIdFor(Notification_category::class,'notification_category_id')->index()->constrained()->onDelete('cascade');
-            $table->string('title');
-            $table->longText('description');
+            $table->string('category');
             $table->timestamps();
         });
     }
@@ -31,6 +28,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notifications');
+        Schema::dropIfExists('notification_categories');
     }
 };
