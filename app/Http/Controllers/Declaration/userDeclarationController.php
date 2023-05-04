@@ -130,7 +130,7 @@ class userDeclarationController extends Controller
 
     }
 
-    public function previewAdf($declaration_type): JsonResponse
+    public function previewAdf(Request $request): JsonResponse
     {
 
         $year = Financial_year::where('is_active', '=', 1)->first();
@@ -148,7 +148,7 @@ class userDeclarationController extends Controller
                 $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
             },
         ])
-            ->where('declaration_type_id','=', $declaration_type)
+            ->where('declaration_type_id','=', $request->declaration_type)
             ->where('user_id', '=', auth()->user()->id)
             ->where('financial_year_id', '=', $year->id)
             ->first();
