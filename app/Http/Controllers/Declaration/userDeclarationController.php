@@ -130,7 +130,7 @@ class userDeclarationController extends Controller
 
     }
 
-    public function previewAdf(): JsonResponse
+    public function previewAdf($declaration_type): JsonResponse
     {
 
         $year = Financial_year::where('is_active', '=', 1)->first();
@@ -148,9 +148,17 @@ class userDeclarationController extends Controller
                 $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
             },
         ])
+            ->where('declaration_type_id','=', $declaration_type)
             ->where('user_id', '=', auth()->user()->id)
             ->where('financial_year_id', '=', $year->id)
             ->first();
+
+        if ($declaration == null){
+
+            $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
+
+            return response()->json($response, 200);
+        }
 
         foreach ($declaration->declaration_type->sections as $section) {
 
@@ -178,6 +186,34 @@ class userDeclarationController extends Controller
         ]);
 
         $response = ['statusCode' => 200, 'password' => decrypt($download->password)];
+
+        return response()->json($response, 200);
+    }
+
+    public function getDeclarationReceipt(Request $request): JsonResponse
+    {
+
+        $active_year = Financial_year::where('is_active', '=', 1)->first();
+
+        $declaration = User_declaration::with([
+            'declaration_type',
+            'user' => function ($query) {
+                $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
+            },
+        ])
+            ->where('declaration_type_id','=', $request->declaration_type)
+            ->where('user_id', '=', auth()->user()->id)
+            ->where('financial_year_id', '=', $active_year->id)
+            ->first();
+
+        if ($declaration == null){
+
+            $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
+
+            return response()->json($response, 200);
+        }
+
+        $response = ['statusCode' => 200, 'message' => "Umefanikiwa kutuma tamko lako lenye kumbukumbu namba: ".$declaration->adf_number." Sekretarieti ya maadili.", 'declaration' => $declaration, 'year' => $active_year->year];
 
         return response()->json($response, 200);
     }
