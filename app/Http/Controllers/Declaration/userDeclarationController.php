@@ -286,16 +286,16 @@ class userDeclarationController extends Controller
                     $encode = json_encode($array, 1);
                     $row = json_decode($encode, true);
 
-                    DB::table($table)->insert($row);
+                   $data =  DB::table($table)->insert($row);
 
                 }
 
+                $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu', 'data' => $data];
+
+                return response()->json($response);
             }
         }
 
-        $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu'];
-
-        return response()->json($response);
     }
 
 }
