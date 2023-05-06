@@ -15,7 +15,12 @@ return new class extends Migration
     {
         Schema::create('family_member_types', function (Blueprint $table) {
             $table->id();
-            $table->string('member');
+            $table->uuid('secure_token');
+            $table->string('member_sw')->nullable();
+            $table->string('member_en')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

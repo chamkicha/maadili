@@ -16,7 +16,8 @@ return new class extends Migration
         Schema::create('desk_categories', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->string('category')->nullable();
+            $table->string('category_sw')->nullable();
+            $table->string('category_en')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
             $table->softDeletes();
