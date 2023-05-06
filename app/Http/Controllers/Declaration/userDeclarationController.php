@@ -151,7 +151,7 @@ class userDeclarationController extends Controller
             'flag' => $request->input('flag')
         ]);
 
-        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma tamko lako Sekretarieti ya maadili, Ahsante.', 'data' => $data];
+        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma tamko lako la '.$declaration->type.' Sekretarieti ya maadili, Ahsante.', 'data' => $data];
 
         return response()->json($response, 200);
     }
