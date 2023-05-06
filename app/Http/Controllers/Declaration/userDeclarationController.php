@@ -77,7 +77,7 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
-    public function declarationSubmission(Request $request): JsonResponse
+    public function declarationSave(Request $request): JsonResponse
     {
 
         $validator = Validator::make($request->all(), [
@@ -128,6 +128,32 @@ class userDeclarationController extends Controller
         }
 
 
+    }
+
+    public function declarationSubmission(Request $request): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'declaration_type' => 'required|integer',
+            'flag' => 'required|string',
+        ]);
+
+        $declaration = Declaration_type::find($request->input('declaration_type'));
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
+        $data = User_declaration::where('user_id', '=', auth()->user()->id)
+            ->where('financial_year_id', '=', $year->id)
+            ->where('declaration_type_id', '=', $declaration->id)
+            ->first();
+
+        $data->update([
+            'flag' => $request->input('flag')
+        ]);
+
+        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma tamko lako Sekretarieti ya maadili, Ahsante.', 'data' => $data];
+
+        return response()->json($response, 200);
     }
 
     public function previewAdf(Request $request): JsonResponse
