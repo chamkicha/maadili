@@ -22,6 +22,9 @@ return new class extends Migration
             $table->longText('description_sw')->nullable();
             $table->longText('description_en')->nullable();
             $table->longText('notification')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
+            $table->boolean('is_active')->default(false);
             $table->timestamps();
         });
     }

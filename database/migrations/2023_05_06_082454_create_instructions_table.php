@@ -15,6 +15,12 @@ return new class extends Migration
     {
         Schema::create('instructions', function (Blueprint $table) {
             $table->id();
+            $table->uuid('secure_token');
+            $table->longText('instruction_sw')->nullable();
+            $table->longText('instruction_en')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
