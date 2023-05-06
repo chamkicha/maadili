@@ -288,7 +288,7 @@ class userDeclarationController extends Controller
 
                    $data =  DB::table($table)->insert($row);
 
-                    $response = ['statusCode' => 200, 'message' => 'Tamko lako limetumwa kikamilifu', 'data' => $data];
+                    $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'data' => $data];
 
                     return response()->json($response);
                 }
