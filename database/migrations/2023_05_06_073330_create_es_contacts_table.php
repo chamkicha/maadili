@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Staff;
+use App\Models\Zone;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +15,14 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('notification_categories', function (Blueprint $table) {
+        Schema::create('es_contacts', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->string('category_sw')->nullable();
-            $table->string('category_en')->nullable();
+            $table->foreignIdFor(Zone::class,'zone_id')->index()->constrained()->onDelete('cascade');
+            $table->string('postal_address')->nullable();
+            $table->string('physical_address')->nullable();
+            $table->string('phone_number')->nullable();
+            $table->string('email')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
             $table->softDeletes();
@@ -32,6 +37,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notification_categories');
+        Schema::dropIfExists('es_contacts');
     }
 };

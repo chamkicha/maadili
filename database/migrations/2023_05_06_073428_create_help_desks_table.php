@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Desk_category;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +14,11 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('notification_categories', function (Blueprint $table) {
+        Schema::create('help_desks', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->string('category_sw')->nullable();
-            $table->string('category_en')->nullable();
+            $table->foreignIdFor(Desk_category::class,'desk_category_id')->index()->constrained()->onDelete('cascade');
+            $table->string('contact')->nullable();
             $table->unsignedBigInteger('created_by')->nullable()->index();
             $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
             $table->softDeletes();
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notification_categories');
+        Schema::dropIfExists('help_desks');
     }
 };

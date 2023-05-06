@@ -16,7 +16,11 @@ return new class extends Migration
         Schema::create('complainant_types', function (Blueprint $table) {
             $table->id();
             $table->uuid('secure_token');
-            $table->string('type');
+            $table->string('name_sw')->nullable();
+            $table->string('name_en')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
