@@ -77,6 +77,31 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function deleteDeclaration(Request $request): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'declaration_type' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+        $declaration = Declaration_type::find($request->input('declaration_type'));
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
+        $data = User_declaration::where('user_id', '=', auth()->user()->id)
+            ->where('financial_year_id', '=', $year->id)
+            ->where('declaration_type_id', '=', $declaration->id)
+            ->delete('cascade');
+
+        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kufuta '.$declaration->type.' kikamilifu'];
+
+        return response()->json($response, 200);
+    }
+
     public function declarationSave(Request $request): JsonResponse
     {
 
