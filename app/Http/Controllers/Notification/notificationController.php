@@ -12,7 +12,10 @@ class notificationController extends Controller
     public function showNotifications(): JsonResponse
     {
 
-        $notifications = Notification::get();
+        $notifications = Notification::with([
+            'category'
+        ])
+            ->get();
 
         $response = ['notifications' => $notifications];
 
