@@ -91,7 +91,7 @@ class userDeclarationController extends Controller
             return response()->json($validator->errors());
         }
 
-//        try {
+        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             $year = Financial_year::where('is_active', '=', true)->first();
@@ -119,14 +119,13 @@ class userDeclarationController extends Controller
             }
 
             return $this->insertSections($sections, $check);
-
-//        } catch (Exception $error) {
-//            return response()->json([
-//                'statusCode' => 402,
-//                'message' => 'Something went wrong.',
-//                'error' => $error,
-//            ]);
-//        }
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
 
 
     }
@@ -287,7 +286,7 @@ class userDeclarationController extends Controller
                     $encode = json_encode($array, 1);
                     $row = json_decode($encode, true);
 
-                   $data =  DB::table($table)->insertGetId($row);
+                   $data =  DB::table($table)->insert($row);
 
                     $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'data' => $data];
 

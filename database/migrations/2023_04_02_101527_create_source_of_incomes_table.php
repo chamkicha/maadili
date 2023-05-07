@@ -15,7 +15,12 @@ return new class extends Migration
     {
         Schema::create('source_of_incomes', function (Blueprint $table) {
             $table->id();
-            $table->string('source');
+            $table->uuid('secure_token');
+            $table->string('source_sw')->nullable();
+            $table->string('source_en')->nullable();
+            $table->unsignedBigInteger('created_by')->nullable()->index();
+            $table->foreign('created_by')->references('id')->on('staff')->onDelete('cascade');
+            $table->softDeletes();
             $table->timestamps();
         });
     }
