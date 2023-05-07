@@ -286,7 +286,7 @@ class userDeclarationController extends Controller
                     $encode = json_encode($array, 1);
                     $row = json_decode($encode, true);
 
-                   $data =  DB::table($table)->insert($row);
+                   $data =  DB::table($table)->insertGetId($row);
 
                     $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'data' => $data];
 
