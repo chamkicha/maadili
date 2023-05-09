@@ -158,10 +158,15 @@ class userDeclarationController extends Controller
     public function declarationSubmission(Request $request): JsonResponse
     {
 
+
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
             'flag' => 'required|string',
         ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
 
         $declaration = Declaration_type::find($request->input('declaration_type'));
 
@@ -226,6 +231,16 @@ class userDeclarationController extends Controller
 
     public function confirmDeclarationPreview(Request $request): JsonResponse
     {
+
+        $validator = Validator::make($request->all(), [
+            'adf_token' =>  ['required','uuid'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
 
         $adf_token = $request->input('adf_token');
 
