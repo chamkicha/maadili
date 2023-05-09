@@ -224,6 +224,26 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function confirmDeclarationPreview(Request $request): JsonResponse
+    {
+
+        $adf_token = $request->input('adf_token');
+
+        $update = User_declaration::where('secure_token','=',$adf_token)->first();
+
+        if ($update == null){
+
+            $response = ['statusCode' => 400, 'message' => 'ADF token '.$adf_token.' haipo, Ahsante'];
+            return response()->json($response, 200);
+        }
+
+        $update->is_confirmed = true;
+        $update->save();
+
+        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kuthibitisha, sasa unaweza kuwasilisha tamko hili Sekretarieti ya maadili, Ahsante','data' => $update];
+        return response()->json($response, 200);
+    }
+
     public function downloadAdf(Request $request): JsonResponse
     {
 
