@@ -40,6 +40,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('save/declaration', 'declarationSave');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::post('declaration/preview', 'previewAdf');
+        Route::post('declaration/confirmation', 'confirmDeclarationPreview');
         Route::post('delete/declaration', 'deleteDeclaration');
         Route::post('declaration/receipt', 'getDeclarationReceipt');
         Route::post('declaration/download', 'downloadAdf');
