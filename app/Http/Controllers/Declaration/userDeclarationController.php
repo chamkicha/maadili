@@ -263,12 +263,13 @@ class userDeclarationController extends Controller
     {
 
         $user_declaration = $request->input('user_declaration');
+        $password = $request->input('password');
 
         $download = Declaration_download::create([
             'secure_token' => Str::uuid(),
             'downloader_secure_token' => auth()->user()->secure_token,
             'user_declaration_id' => $user_declaration,
-            'password' => encrypt($this->generateADFPassword())
+            'password' => encrypt($password)
         ]);
 
         $response = ['statusCode' => 200, 'password' => decrypt($download->password)];
