@@ -262,6 +262,16 @@ class userDeclarationController extends Controller
     public function downloadAdf(Request $request): JsonResponse
     {
 
+        $validator = Validator::make($request->all(), [
+            'user_declaration' =>  ['required','integer'],
+            'password' =>  ['required','string','min:8'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
         $user_declaration = $request->input('user_declaration');
         $password = $request->input('password');
 
