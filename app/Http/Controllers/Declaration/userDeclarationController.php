@@ -63,7 +63,7 @@ class userDeclarationController extends Controller
             'requirements' => function($query){
                $query->with([
                    'requirement' => function($qry){
-                      $qry->select('id','label','field_name','field_type');
+                      $qry->select('id','label','field_name','field_type','end_point');
                    }
                ])
                    ->select('id','secure_token','section_id','requirement_id');
@@ -157,7 +157,6 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
-
 
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
