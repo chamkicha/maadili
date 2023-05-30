@@ -286,6 +286,27 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function ADFDownloadHistory(){
+
+        $download_histories = Declaration_download::with([
+            'user_declaration' => function($query){
+             $query->with([
+                 'declaration_type' => function($qry){
+                   $qry->select('id','type');
+                 }
+             ])
+                 ->select('id','declaration_type_id','adf_number');
+            },
+        ])
+        ->where('downloader_secure_token','=',auth()->user()->secure_token)
+            ->select('id','secure_token','user_declaration_id','password')
+            ->get();
+
+        $response = ['statusCode' => 200, 'data' => $download_histories];
+
+        return response()->json($response, 200);
+    }
+
     public function getDeclarationReceipt(Request $request): JsonResponse
     {
 

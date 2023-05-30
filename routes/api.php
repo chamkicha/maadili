@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('delete/declaration', 'deleteDeclaration');
         Route::post('declaration/receipt', 'getDeclarationReceipt');
         Route::post('declaration/download', 'downloadAdf');
+        Route::get('declaration/history', 'ADFDownloadHistory');
     });
 
     Route::controller(familyMemberController::class)->group(function (){

@@ -17,7 +17,7 @@ class Declaration_download extends Model
         'password'
     ];
 
-    public function declaration(): BelongsTo
+    public function user_declaration(): BelongsTo
     {
 
         return $this->belongsTo(User_declaration::class,'user_declaration_id','id');
