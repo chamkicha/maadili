@@ -62,25 +62,26 @@ class userDeclarationController extends Controller
             ->where('declaration_type_id', '=', $declaration->id)
             ->first();
 
-        if ($check->is_confirmed && $declaration->declaration_code == "TRM"){
+        if ($check != null) {
+            if ($check->is_confirmed && $declaration->declaration_code == "TRM") {
 
-            $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
-
-            return response()->json($response);
-        }
-        elseif ($check->is_confirmed && $declaration->declaration_code != "TRM"){
-
-            $initDay = Carbon::parse($check->created_at);
-
-            $diffDays = $initDay->diffInDays($today);
-
-            if ($diffDays <= 7){
-
-                $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+                $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
 
                 return response()->json($response);
-            }
+            } elseif ($check->is_confirmed && $declaration->declaration_code != "TRM") {
 
+                $initDay = Carbon::parse($check->created_at);
+
+                $diffDays = $initDay->diffInDays($today);
+
+                if ($diffDays <= 7) {
+
+                    $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+
+                    return response()->json($response);
+                }
+
+            }
         }
 
         $response = ['statusCode' => 200,'declaration' => $declaration];
