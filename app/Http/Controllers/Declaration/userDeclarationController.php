@@ -310,7 +310,15 @@ class userDeclarationController extends Controller
             $data = DB::table(strtolower($section->table_name))
                 ->get();
 
+            $requirements = DB::table('requirements')
+                ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                ->join('sections','section_requirements.section_id','=','sections.id')
+                ->where('sections.table_name','=',$section->table_name)
+                ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->get();
+
             $section->section_data = $data;
+            $section->requirements = $requirements;
         }
 
         $response = ['statusCode' => 200, 'declaration' => $declaration, 'year' => $year->year];
