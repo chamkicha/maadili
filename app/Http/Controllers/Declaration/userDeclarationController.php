@@ -216,6 +216,35 @@ class userDeclarationController extends Controller
 
     }
 
+    public function updateSection(Request $request,$id){
+
+//       return $request->getContent();
+
+        $table = strtolower($request['section']['table']);
+        $data = $request['section']['data'];
+
+        if (count($data) > 0) {
+
+            foreach ($data as $values) {
+
+                foreach ($values as $key => $value) {
+
+                    DB::table($table)->where('id','=',$id)->update([
+                        $key => $value
+                    ]);
+                }
+
+                $data = DB::table($table)->orderBy('id','DESC')->first();
+
+                $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kurekebisha taarifa zako', 'table' => $table,'data' => $data];
+
+                return response()->json($response);
+            }
+
+        }
+
+    }
+
     public function declarationSubmission(Request $request): JsonResponse
     {
 
@@ -438,9 +467,11 @@ class userDeclarationController extends Controller
                     $encode = json_encode($array, 1);
                     $row = json_decode($encode, true);
 
-                   $data =  DB::table($table)->insert($row);
+                     DB::table($table)->insert($row);
 
-                    $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'data' => $data];
+                    $data = DB::table($table)->orderBy('id','DESC')->first();
+
+                    $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'table' => $table,'data' => $data];
 
                     return response()->json($response);
                 }

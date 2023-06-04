@@ -38,6 +38,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('declaration/form/{secure_token?}', 'declarationForm');
         Route::get('declaration/sections/form/{secure_token?}', 'sectionRequirementsForm');
         Route::post('save/declaration', 'declarationSave');
+        Route::post('update/declaration/section/{id?}', 'updateSection');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::post('declaration/preview', 'previewAdf');
         Route::post('declaration/confirmation', 'confirmDeclarationPreview');
