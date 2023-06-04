@@ -46,11 +46,42 @@ class userDeclarationController extends Controller
 
     public function declarationForm($secure_token): JsonResponse
     {
+
+        $today = Carbon::now();
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
         $declaration = Declaration_type::with([
             'sections'
         ])
             ->where('secure_token', '=', $secure_token)
             ->first();
+
+        $check = User_declaration::where('user_id', '=', auth()->user()->id)
+            ->where('financial_year_id', '=', $year->id)
+            ->where('declaration_type_id', '=', $declaration->id)
+            ->first();
+
+        if ($check->is_confirmed && $declaration->declaration_code == "TRM"){
+
+            $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
+
+            return response()->json($response);
+        }
+        elseif ($check->is_confirmed && $declaration->declaration_code != "TRM"){
+
+            $initDay = Carbon::parse($check->created_at);
+
+            $diffDays = $initDay->diffInDays($today);
+
+            if ($diffDays <= 7){
+
+                $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+
+                return response()->json($response);
+            }
+
+        }
 
         $response = ['statusCode' => 200,'declaration' => $declaration];
 
