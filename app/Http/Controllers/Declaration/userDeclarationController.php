@@ -12,6 +12,7 @@ use App\Models\Section;
 use App\Models\Section_requirement;
 use App\Models\User;
 use App\Models\User_declaration;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -102,7 +103,7 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
-    public function declarationSave(Request $request): JsonResponse
+    public function declarationSave(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
@@ -116,6 +117,8 @@ class userDeclarationController extends Controller
             return response()->json($validator->errors());
         }
 
+        $today = Carbon::now();
+
         try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
@@ -128,22 +131,48 @@ class userDeclarationController extends Controller
 
             $sections = $request->input('sections');
 
-            if ($check == null) {
+            if ($check != null) {
 
-                $user_declaration = User_declaration::create([
-                    'secure_token' => Str::uuid(),
-                    'user_id' => auth()->user()->id,
-                    'declaration_type_id' => $declaration->id,
-                    'adf_number' => $this->generateAdfNumber($declaration->declaration_code, $year->year),
-                    'financial_year_id' => $year->id,
-                    'flag' => $request->input('flag')
-                ]);
+                if ($check->is_confirmed && $declaration->declaration_code == "TRM"){
 
-                return $this->insertSections($sections, $user_declaration);
+                    $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
+
+                    return response()->json($response);
+                }
+                elseif ($check->is_confirmed && $declaration->declaration_code != "TRM"){
+
+                    $initDay = Carbon::parse($check->created_at);
+
+                    $diffDays = $initDay->diffInDays($today);
+
+//                    return ['$diffDays'=> $diffDays,'$initDay' => $initDay,'today' => $today];
+                    if ($diffDays <= 7){
+
+                        $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+
+                        return response()->json($response);
+                    }
+                    else{
+
+                        return $this->insertSections($sections, $check);
+                    }
+                }
+
+                return $this->insertSections($sections, $check);
 
             }
 
-            return $this->insertSections($sections, $check);
+        $user_declaration = User_declaration::create([
+            'secure_token' => Str::uuid(),
+            'user_id' => auth()->user()->id,
+            'declaration_type_id' => $declaration->id,
+            'adf_number' => $this->generateAdfNumber($declaration->declaration_code, $year->year),
+            'financial_year_id' => $year->id,
+            'flag' => $request->input('flag')
+        ]);
+
+        return $this->insertSections($sections, $user_declaration);
+
         } catch (Exception $error) {
             return response()->json([
                 'statusCode' => 402,
