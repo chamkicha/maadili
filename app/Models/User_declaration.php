@@ -21,13 +21,7 @@ class User_declaration extends Model
         'flag',
         'is_confirmed'
     ];
-
-    public function user(): BelongsTo
-    {
-
-        return $this->belongsTo(User::class,'user_id','id');
-    }
-
+  
     public function declaration_type(): BelongsTo
     {
 
@@ -38,6 +32,11 @@ class User_declaration extends Model
     {
 
         return $this->hasMany(Declaration_download::class,'user_declaration_id','id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id','id');
     }
 
 }

@@ -20,12 +20,39 @@ use App\Models\Title;
 use App\Models\Transportation_type;
 use App\Models\Type_of_use;
 use App\Models\Ward;
+use App\Models\Hadhi;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use App\Models\Financial_year;
+use App\Models\Council;
+use App\Models\Village;
+use App\Models\Menu_lookup;
+use App\Models\User;
+
 
 class lookUpDataController extends Controller
 {
+
+    public function financial_year(){
+        $Financial_year = Financial_year::where('is_active', '=', true)->get();
+
+        $response = ['Financial_year' => $Financial_year];
+
+        return response()->json($response,200);
+
+    }
+
+    public function hadhi(){
+
+
+        $hadhi = Hadhi::get();
+
+        $response = ['hadhi' => $hadhi];
+
+        return response()->json($response,200);
+
+    }
 
     public function country(): JsonResponse
     {
@@ -46,13 +73,10 @@ class lookUpDataController extends Controller
         return response()->json($response,200);
     }
 
-    public function districts($RegionCode): JsonResponse
+    public function districts($regionId): JsonResponse
     {
-
-        $districts = District::where('region_code','=',$RegionCode)->get();
-
+        $districts = District::where('region_id','=',$regionId)->get();
         $response = ['districts' => $districts];
-
         return response()->json($response,200);
     }
 
@@ -62,6 +86,26 @@ class lookUpDataController extends Controller
         $wards = Ward::where('district_id','=',$LgaCode)->get();
 
         $response = ['wards' => $wards];
+
+        return response()->json($response,200);
+    }
+
+    public function villages($ward_id): JsonResponse
+    {
+
+        $villages = Village::where('ward_id','=',$ward_id)->get();
+
+        $response = ['villages' => $villages];
+
+        return response()->json($response,200);
+    }
+
+    public function councils($district_id): JsonResponse
+    {
+
+        $councils = Council::where('district_id','=',$district_id)->get();
+
+        $response = ['councils' => $councils];
 
         return response()->json($response,200);
     }
@@ -127,6 +171,57 @@ class lookUpDataController extends Controller
         return response()->json($response,200);
     }
 
+    public function menuLookup(){
+        $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
+
+        if($menu_lookup){
+
+            if($menu_lookup->stage_one === false){
+                return response()->json([
+                    'statusCode' => 400,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+
+            if($menu_lookup->stage_two === false){
+                $user = User::where('id',auth()->user()->id)->first();
+                if ($user !== null && ($user->maritial_status_id === 2 || $user->maritial_status_id === 3)) {
+
+                return response()->json([
+                    'statusCode' => 401,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za wategemezi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+               }
+            }
+
+            if($menu_lookup->stage_three === false){
+                return response()->json([
+                    'statusCode' => 402,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za ajira ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+
+
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Ndugu kiongozi tafadhali chagua aina ya Tamko ili uanze kujaza tamko.',
+                'error' => false,
+            ]);
+        }else{
+
+            return response()->json([
+                'statusCode' => 400,
+                'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                'error' => true,
+            ]);
+        }
+
+
+    }
+
     public function declarationType(): JsonResponse
     {
 
@@ -140,8 +235,21 @@ class lookUpDataController extends Controller
     public function familyMemberType(): JsonResponse
     {
 
-        $member_types = Family_member_type::get();
+        $sex = auth()->user();
+        // dd($sex);
+        if($sex){
+            if($sex->sex_id == '1'){
+                $member_sw = 'Mume';
+            }elseif($sex->sex_id == '2'){
+                $member_sw = 'Mke';
 
+            }
+        }else{
+            $member_sw = 'Mume';
+
+        }
+        // $member_types = Family_member_type::get();
+        $member_types = Family_member_type::whereNotIn('member_sw', [$member_sw])->get();
         $response = ['member_types' => $member_types];
 
         return response()->json($response,200);

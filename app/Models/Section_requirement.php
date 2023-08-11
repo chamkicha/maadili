@@ -15,5 +15,7 @@ class Section_requirement extends Model
     {
 
         return $this->belongsTo(Requirement::class,'requirement_id','id');
+
+        
     }
 }

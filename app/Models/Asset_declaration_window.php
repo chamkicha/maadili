@@ -15,4 +15,5 @@ class Asset_declaration_window extends Model
 
         return $this->belongsTo(Declaration_type::class,'declaration_type_id','id');
     }
+
 }

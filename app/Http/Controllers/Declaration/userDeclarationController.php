@@ -11,6 +11,7 @@ use App\Models\Financial_year;
 use App\Models\Section;
 use App\Models\Section_requirement;
 use App\Models\User;
+use App\Models\UserDeclarationsLookup;
 use App\Models\User_declaration;
 use Carbon\Carbon;
 use Exception;
@@ -21,22 +22,148 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use stdClass;
+use App\Models\Family_member;
+use App\Models\Sectiontaarafa478;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Crypt;
 
 class userDeclarationController extends Controller
 {
+    public function declarationsCheck(){
+        try{
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
+        // $check = User_declaration::where('user_id', '=', auth()->user()->id)
+        //         ->with('declaration_type')
+        //         ->where('financial_year_id', '=', $year->id)
+        //         ->where('flag', '=', 'save')
+        //         ->where('is_deleted', '=', false)
+        //         ->first();
+
+        $check = User_declaration::where('user_id', '=', auth()->user()->id)
+                    ->with('declaration_type')
+                    ->where('financial_year_id', '=', $year->id)
+                    ->where('is_deleted', '=', false)
+                    ->where('flag', '=', 'save')
+                    ->orderBy('id', 'desc') // Sorting in descending order using the 'id' field
+                    ->first();
+
+
+                if($check){
+
+
+                    $declaration = Declaration_type::where('id',$check->declaration_type_id)->first();
+                        if($declaration){
+                            $declaration_type_token = $declaration->secure_token;
+                            $declaration_model = $declaration->declaration_model;
+                        }else{
+                            $declaration_type_token = null;
+                        }
+
+
+                    $response = [
+                                 'statusCode' => 200, 
+                                 'message' => 'Ndugu kiongozi bado unaendelea kujaza '.$check->declaration_type->type.' , Tafadhali malizia kujaza, Ahsante!.',
+                                 'message_thibitisha' => 'Tafadhali bonyeza "THIBITISHA" kama hauna matamko katika maeneo hayo, AU bonyeza "ENDELEA" ili kuendelea kujaza. Ahsante',
+                                 'user_declaration_id' => $check->id,
+                                 'declaration_type_token' => $declaration_type_token,
+                                 'declaration_model' => $declaration_model,
+                                 'declaration_type_id' => $check->declaration_type_id,
+                                 'is_nyongeza' => $check->is_nyongeza
+                                ];
+
+                    return response()->json($response, 200);
+                }else{
+
+                    $response = [
+                        'statusCode' => 201, 
+                        'message' => 'Samahani Ndugu Kiongozi, Hauna tamko la kuthibitisha.',
+                       ];
+
+                    return response()->json($response, 200);
+                }
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+
+    public function declarationsCheckNyongeza(){
+        try{
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
+        $check = User_declaration::where('user_id', '=', auth()->user()->id)
+                ->with('declaration_type')
+                ->where('financial_year_id', '=', $year->id)
+                ->where('flag', '=', 'submit')
+                ->where('is_deleted', '=', false)
+                ->first();
+
+                if($check){
+
+
+
+                $declaration = Declaration_type::where('id',$check->declaration_type_id)->first();
+                if($declaration){
+                    $declaration_type_token = $declaration->secure_token;
+                    $declaration_model = $declaration->declaration_model;
+                }else{
+                    $declaration_type_token = null;
+                }
+
+
+                    $response = [
+                                 'statusCode' => 200, 
+                                 'message' => 'Ndugu kiongozi endelea kuongeza au kupunguza '.$check->declaration_type->type.' , Ahsante!.',
+                                 'user_declaration_id' => $check->id,
+                                 'declaration_type_token' => $declaration_type_token,
+                                 'declaration_model' => $declaration_model,
+                                 'declaration_type_id' => $check->declaration_type_id,
+                                ];
+
+                    return response()->json($response, 200);
+                }else{
+
+                    $response = [
+                        'statusCode' => 201, 
+                        'message' => 'Samahani Ndugu Kiongozi, Hauna tamko la Kuongeza au Kupunguza.',
+                       ];
+
+                    return response()->json($response, 200);
+                }
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+
     public function declarations(): JsonResponse
     {
 
         $declaration_window = Asset_declaration_window::with([
             'declarations' => function ($query) {
-                $query->select('id', 'secure_token', 'type');
+                $query->where('status_id','=', '1');
+                $query->select('id', 'secure_token', 'type','declaration_model');
             }
         ])
             ->where('is_active', '=', true)
             ->select('id', 'declaration_type_id', 'is_active')
             ->get();
 
-//        $declarations = Declaration_type::get();
+      //        $declarations = Declaration_type::get();
 
         $response = ['statusCode' => 200, 'declaration_window' => $declaration_window];
 
@@ -51,102 +178,171 @@ class userDeclarationController extends Controller
 
         $year = Financial_year::where('is_active', '=', true)->first();
 
-        $declaration = Declaration_type::with([
-            'sections'
+         $declaration = Declaration_type::with([
+             'sections' => function ($query) {
+            $query->orderBy('declaration_sections.section_flow', 'ASC')->where('status_id',1);
+        }
         ])
             ->where('secure_token', '=', $secure_token)
             ->first();
+
+
+
+
+        foreach ($declaration->sections as $section) {
+            $table_name = strtolower($section->table_name);
+
+            $check_user_dec = DB::table($table_name)
+                            //   ->where()
+                              ->first();
+        
+            // Check if $check_user_dec has data
+            $section->has_data = $check_user_dec !== null ? 1 : 0;
+        }
 
         $check = User_declaration::where('user_id', '=', auth()->user()->id)
             ->where('financial_year_id', '=', $year->id)
             ->where('declaration_type_id', '=', $declaration->id)
             ->first();
 
-        if ($check != null) {
-            if ($check->is_confirmed && $declaration->declaration_code == "TRM") {
+        // if ($check != null) {
+        //     if ($check->is_confirmed && $declaration->declaration_code == "TRM") {
 
-                $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
+        //         $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
 
-                return response()->json($response);
-            } elseif ($check->is_confirmed && $declaration->declaration_code != "TRM") {
+        //         return response()->json($response);
+        //     } elseif ($check->is_confirmed && $declaration->declaration_code != "TRM") {
 
-                $initDay = Carbon::parse($check->created_at);
+        //         $initDay = Carbon::parse($check->created_at);
 
-                $diffDays = $initDay->diffInDays($today);
+        //         $diffDays = $initDay->diffInDays($today);
 
-                if ($diffDays <= 7) {
+        //         if ($diffDays <= 7) {
 
-                    $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+        //             $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
 
-                    return response()->json($response);
-                }
+        //             return response()->json($response);
+        //         }
 
-            }
-        }
-
+        //     }
+        // }
         $response = ['statusCode' => 200,'declaration' => $declaration];
 
         return response()->json($response, 200);
     }
 
-    public function sectionRequirementsForm($secure_token): JsonResponse
+
+
+    public function getSectionsList(Request $request): JsonResponse
     {
-
-        $section = Section::with([
-            'requirements' => function($query){
-               $query->with([
-                   'requirement' => function($qry){
-                      $qry->select('id','label','field_name','field_type','end_point');
-                   }
-               ])
-                   ->select('id','secure_token','section_id','requirement_id');
-            }
-        ])
-            ->where('secure_token','=',$secure_token)
-            ->first();
-
-        $response = ['statusCode' => 200, 'section' => $section];
-
-        return response()->json($response, 200);
-    }
-
-    public function deleteDeclaration(Request $request): JsonResponse
-    {
-
         $validator = Validator::make($request->all(), [
-            'declaration_type' => 'required|integer',
+            'declaration_type_secure_token' =>  ['required','string'],
+            'member_id' =>  ['required','integer'],
+            'is_pl' =>  ['required','integer'],
+            'user_declaration_id' =>  ['required','string'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
         }
 
-        $declaration = Declaration_type::find($request->input('declaration_type'));
+        $today = Carbon::now();
 
         $year = Financial_year::where('is_active', '=', true)->first();
 
-        $data = User_declaration::where('user_id', '=', auth()->user()->id)
+         $declaration = Declaration_type::with([
+             'sections' => function ($query) {
+            $query->orderBy('declaration_sections.section_flow', 'ASC')->where('status_id',1);
+        }
+        ])
+            ->where('secure_token', '=', $request->declaration_type_secure_token)
+            ->first();
+        
+        if($declaration == null){
+
+            $response = [
+                'statusCode' => 201, 
+                'message' => 'Samahani Ndugu Kiongozi, Hauna tamko la kuthibitisha.',
+                ];
+
+            return response()->json($response, 200);
+        }   
+
+
+        foreach ($declaration->sections as $section) {
+
+            $has_data_on_section = DB::table(strtolower($section->table_name))
+                        ->where('member_id','=',$request->member_id)
+                        ->where('user_declaration_id','=',$request->user_declaration_id)
+                        ->where('is_pl','=',$request->is_pl)
+                        ->get();
+
+            // dd($check_user_dec);
+            // Check if $check_user_dec has data
+            if($has_data_on_section->isEmpty()){
+                $has_data = 0;
+            }else{
+                $has_data = 1;
+            }
+            $section->has_data = $has_data;
+        }
+
+        $check = User_declaration::where('user_id', '=', auth()->user()->id)
             ->where('financial_year_id', '=', $year->id)
             ->where('declaration_type_id', '=', $declaration->id)
-            ->delete('cascade');
+            ->first();
 
-        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kufuta '.$declaration->type.' kikamilifu'];
+        // if ($check != null) {
+        //     if ($check->is_confirmed && $declaration->declaration_code == "TRM") {
+
+        //         $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
+
+        //         return response()->json($response);
+        //     } elseif ($check->is_confirmed && $declaration->declaration_code != "TRM") {
+
+        //         $initDay = Carbon::parse($check->created_at);
+
+        //         $diffDays = $initDay->diffInDays($today);
+
+        //         if ($diffDays <= 7) {
+
+        //             $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
+
+        //             return response()->json($response);
+        //         }
+
+        //     }
+        // }
+        $response = ['statusCode' => 200,'declaration' => $declaration];
 
         return response()->json($response, 200);
     }
 
-    public function declarationSave(Request $request)
+    
+    public function DeclarationCreate(Request $request)
     {
 
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
-            'sections' => 'required|array',
             'flag' => 'required|string',
+            'financial_year_id' => 'required|integer',
+            'declaration_secure_token' => 'required|string',
+            
         ]);
 
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json([
+            'statusCode' => 402,
+            'message' => 'validation error',
+            'fields' => $validator->errors(),
+            'error' => true,
+        ]);
         }
 
         $today = Carbon::now();
@@ -154,56 +350,57 @@ class userDeclarationController extends Controller
         try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
-            $year = Financial_year::where('is_active', '=', true)->first();
-
-            $check = User_declaration::where('user_id', '=', auth()->user()->id)
-                ->where('financial_year_id', '=', $year->id)
-                ->where('declaration_type_id', '=', $declaration->id)
-                ->first();
-
-            $sections = $request->input('sections');
-
-            if ($check != null) {
-
-                if ($check->is_confirmed && $declaration->declaration_code == "TRM"){
-
-                    $response = ['statusCode' => 400, 'message' => 'Tayari umeshathibitisha kutuma tamko hili, kwahyo uwezi kujaza tena', 'data' => $check];
-
-                    return response()->json($response);
-                }
-                elseif ($check->is_confirmed && $declaration->declaration_code != "TRM"){
-
-                    $initDay = Carbon::parse($check->created_at);
-
-                    $diffDays = $initDay->diffInDays($today);
-
-//                    return ['$diffDays'=> $diffDays,'$initDay' => $initDay,'today' => $today];
-                    if ($diffDays <= 7){
-
-                        $response = ['statusCode' => 400, 'message' => 'Uwezi kujaza tamko ili kulingana na mda uliotumia awali kujaza aina hii ya tamko,tafadhali subiri zipite siku 7 ndo uweze kujaza tena', 'data' => $check];
-
-                        return response()->json($response);
-                    }
-                    else{
-
-                        return $this->insertSections($sections, $check);
-                    }
-                }
-
-                return $this->insertSections($sections, $check);
-
+            if ($declaration == null) {
+                $response = [
+                    'statusCode' => 404,
+                    'message' => 'Aina ya Tamko halipo.'
+                ];
+            return response()->json($response);
             }
 
-        $user_declaration = User_declaration::create([
-            'secure_token' => Str::uuid(),
-            'user_id' => auth()->user()->id,
-            'declaration_type_id' => $declaration->id,
-            'adf_number' => $this->generateAdfNumber($declaration->declaration_code, $year->year),
-            'financial_year_id' => $year->id,
-            'flag' => $request->input('flag')
-        ]);
+            $year = Financial_year::where('is_active', '=', true)->first();
 
-        return $this->insertSections($sections, $user_declaration);
+            // $check = User_declaration::where('user_id', '=', auth()->user()->id)
+            //     ->where('financial_year_id', '=', $request->input('financial_year_id'))
+            //     ->where('declaration_type_id', '=', $declaration->id)
+            //     ->where('is_deleted', '=', false)
+            //     ->where('flag', '=', 'save')
+            //     ->first();
+            $check = User_declaration::where('user_id', '=', auth()->user()->id)
+                    ->where('financial_year_id', '=', $request->input('financial_year_id'))
+                    // ->where('declaration_type_id', '=', $declaration->id)
+                    ->where('is_deleted', '=', false)
+                    ->where('flag', '=', 'save')
+                    ->orderBy('id', 'desc') // Sorting in descending order using the 'id' field
+                    ->first();
+                    
+            if ($check != null) {
+                $response = [
+                    'statusCode' => 405,
+                    // 'message' => 'Karibu, Tafadhali endelea kujaza tamko.',
+                    'message' => 'Ndugu kiongozi bado unaendelea kujaza '.$check->declaration_type->type.' , Tafadhali malizia kujaza, Ahsante!.',
+                    'user_declaration_id' => $check->id,
+                    'declaration_secure_token' =>$request->declaration_secure_token
+                ];
+            return response()->json($response);
+            }
+
+            $user_declaration = User_declaration::create([
+                'secure_token' => Str::uuid(),
+                'user_id' => auth()->user()->id,
+                'declaration_type_id' => $declaration->id,
+                'adf_number' => $this->generateAdfNumber($declaration->declaration_code, $request->input('financial_year_id')),
+                'financial_year_id' => $request->input('financial_year_id'),
+                'flag' => $request->input('flag')
+            ]);
+            $user_declarations_lookup = $this->user_declarations_lookup($user_declaration->id,$declaration->id);
+            
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Umefanikiwa kuanza mchakato wa kujaza Tamko, Tafadhali endelea.',
+                'user_declaration_id' => $user_declaration->id,
+                'declaration_secure_token' =>$request->declaration_secure_token
+            ]);
 
         } catch (Exception $error) {
             return response()->json([
@@ -216,9 +413,487 @@ class userDeclarationController extends Controller
 
     }
 
-    public function updateSection(Request $request,$id){
+    
+    public function DeclarationCreateNyongezaPunguzo(Request $request)
+    {
 
-//       return $request->getContent();
+        $validator = Validator::make($request->all(), [
+            'declaration_type' => 'required|integer',
+            'flag' => 'required|string',
+            'financial_year_id' => 'required|integer',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+            'statusCode' => 402,
+            'message' => 'validation error',
+            'fields' => $validator->errors(),
+            'error' => true,
+        ]);
+        }
+
+        $today = Carbon::now();
+
+        // try {
+            $declaration = Declaration_type::find($request->input('declaration_type'));
+
+            if ($declaration == null) {
+                $response = [
+                    'statusCode' => 404,
+                    'message' => 'Aina ya Tamko halipo.'
+                ];
+            return response()->json($response);
+            }else{
+
+                $declaration_type_token = $declaration->secure_token;
+                $declaration_model = $declaration->declaration_model;
+            }
+
+            $year = Financial_year::where('is_active', '=', true)->first();
+
+            $check = User_declaration::where('user_id', '=', auth()->user()->id)
+                ->where('financial_year_id', '=', $request->input('financial_year_id'))
+                // ->where('declaration_type_id', '=', $declaration->id)
+                ->where('flag', '=', 'save')
+                ->where('is_deleted', '=', false)
+                ->first();
+                // dd($check);
+            if ($check != null) {
+                $response = [
+                    'statusCode' => 405,
+                    'message' => 'Ndugu kiongozi bado unaendelea kujaza '.$check->declaration_type->type.' , Tafadhali malizia kujaza, Ahsante!.',
+                    'user_declaration_id' => $check->id,
+                    'declaration_secure_token' =>$request->declaration_secure_token,
+                    'declaration_type_token' => $declaration_type_token,
+                    'declaration_model' => $declaration_model,
+                    'declaration_type_id' => $check->declaration_type_id,
+                   'is_nyongeza' => $check->is_nyongeza
+            ];
+            return response()->json($response);
+            }
+
+            if($check != null && $year->id == $request->input('financial_year_id') && $declaration->declaration_model == 2){
+                $response = [
+                    'statusCode' => 406,
+                    'message' => 'Ndugu kiongozi, unaruhusiwa kujaza tamko hili mara moja tu kwa mwaka.',
+                    'declaration_secure_token' =>$request->declaration_secure_token
+                ];
+                return response()->json($response);
+
+            }
+
+
+            $user_declaration = User_declaration::create([
+                'secure_token' => Str::uuid(),
+                'user_id' => auth()->user()->id,
+                'declaration_type_id' => $declaration->id,
+                'adf_number' => $this->generateAdfNumber($declaration->declaration_code, $request->input('financial_year_id')),
+                'financial_year_id' => $request->input('financial_year_id'),
+                'flag' => $request->input('flag')
+            ]);
+            $user_declarations_lookup = $this->user_declarations_lookup($user_declaration->id,$declaration->id);
+            $generate_section_for_nyongeza_punguzo = $this->generate_section_for_nyongeza_punguzo($user_declaration->id,$declaration->id);
+            
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Ndugu kiongozi endelea kuongeza au kupunguza '.$declaration->type.' , Ahsante!.',
+                'user_declaration_id' => $user_declaration->id,
+                'declaration_secure_token' =>$request->declaration_secure_token,
+                'is_nyongeza' =>User_declaration::where('id',$user_declaration->id)->first()->is_nyongeza
+            ]);
+
+        // } catch (Exception $error) {
+        //     return response()->json([
+        //         'statusCode' => 402,
+        //         'message' => 'Tatizo la kimtandao.',
+        //         'error' => $error,
+        //     ]);
+        // }
+
+
+    }
+
+    public function generate_section_for_nyongeza_punguzo($user_declaration_id,$declaration_type_id){
+
+        // $user_declaration = User_declaration::where('declaration_type_id', '=', $declaration_type_id)->get();
+
+        
+        $user_declaration = User_declaration::whereNotIn('id', [$user_declaration_id])
+                            ->where('user_id',auth()->user()->id)
+                            ->where('flag','submit')
+                            ->where('is_deleted',false)
+                            ->get()
+                            ->sortBy('id')
+                            ->last();
+
+        if($user_declaration)
+        {
+            $sections = Declaration_type::join('declaration_sections','declaration_sections.declaration_type_id','=','declaration_types.id')
+                                            ->join('sections','sections.id','=','declaration_sections.section_id')
+                                            ->where('declaration_types.id',$declaration_type_id)
+                                            ->get();
+
+            foreach ($sections as $section) {
+
+                $table_name = strtolower($section->table_name);
+
+                $section_datas = DB::table($table_name)
+                    ->where('user_declaration_id', $user_declaration->id)
+                    ->get();
+                
+                    foreach ($section_datas as $data) {
+                        $data = (array) $data;
+                    
+                        unset($data['id']); // Replace 'id' with your actual primary key column name
+                    
+                        unset($data['user_declaration_id']); // Replace 'user_declaration_id' with the actual column name
+                    
+                        $data['user_declaration_id'] = $user_declaration_id;
+                    
+                        DB::table($table_name)->insert($data);
+                    }
+
+                    $update_is_nyongeza = User_declaration::where('id', '=', $user_declaration_id)->update(['is_nyongeza' => true]);
+
+            }
+
+            
+        }
+
+    }
+
+
+    public function user_declarations_lookup($user_declaration_id,$declaration_type_id){
+        $members = Family_member::with(['member_type'])
+            ->where('user_id','=',auth()->user()->id)
+            ->where('status_id','=',1)
+            ->get();
+
+        $Declaration_section = Declaration_section::where('declaration_type_id',$declaration_type_id)->get();
+
+
+        $pl_lookup_create = UserDeclarationsLookup::create([
+            'pl_id' => auth()->user()->id,
+            'family_member_id' => auth()->user()->id,
+            'status_id' => '0',
+            'user_declaration_id' => $user_declaration_id,
+            'declaration_section_count' => $Declaration_section->count(),
+            'is_pl' => '1',
+            
+        ]);
+
+        if($members){
+            foreach ($members as $member){
+                $member_lookup = UserDeclarationsLookup::create([
+                    'pl_id' => auth()->user()->id,
+                    'family_member_id' => $member->id,
+                    'status_id' => '0',
+                    'user_declaration_id' => $user_declaration_id,
+                    'declaration_section_count' => $Declaration_section->count(),
+                    'is_pl' => '0',
+                    
+                ]);
+            }
+
+        }
+    }
+
+    public function familyMemberDeclaration($user_declaration_id){
+       
+
+        try {
+            
+            $members = Family_member::with(['member_type'])
+                        ->leftjoin('user_declarations_lookup','user_declarations_lookup.family_member_id','=','family_members.id')
+                        ->where('family_members.user_id','=',auth()->user()->id)
+                        ->where('family_members.status_id','=',1)
+                        ->where('user_declarations_lookup.user_declaration_id','=',$user_declaration_id)
+                        ->select([
+                            'family_members.*', 
+                            'user_declarations_lookup.declaration_section_count',
+                            DB::raw('0 as is_pl'),
+                            ])
+                        ->get();
+            $public_leader = User::where('users.id','=',auth()->user()->id)
+                        ->leftjoin('user_declarations_lookup','user_declarations_lookup.pl_id','=','users.id')
+                        ->where('user_declarations_lookup.user_declaration_id','=',$user_declaration_id)
+                        ->select([
+                                'users.id', 
+                                'users.first_name', 
+                                'users.middle_name',
+                                'users.last_name',
+                                'users.nationality',
+                                'user_declarations_lookup.declaration_section_count',
+                                DB::raw('1 as is_pl'),
+                             
+                                ])
+                            ->first();
+
+            if ($public_leader) {
+                // Call your function and get additional data
+                $additionalData = sectioncount($user_declaration_id, $public_leader->id, '1');
+            
+                // Add the additional data to the result
+                $public_leader->declaration_section_completed = $additionalData;
+            }
+            
+            if ($members) {
+
+                foreach ($members as $member) {
+                    // Call your function and get additional data for each member
+                    $additionalData = sectioncount($user_declaration_id, $member->id, '0');
+                
+                    // Add the additional data to the member object
+                    $member->declaration_section_completed = $additionalData;
+                }
+
+                $response = [
+                    'statusCode' => 200,
+                    'message' => 'Taarifa za Tamko la kiongozi na wanafamilia.',
+                    'public_leader' => $public_leader,
+                    'family_members' => $members
+                ];
+            return response()->json($response);
+            }else{
+
+                
+                $response = [
+                    'statusCode' => 200,
+                    'message' => 'Taarifa za Tamko la kiongozi na wanafamilia.',
+                    'public_leader' => $public_leader,
+                    'family_members' => null
+                ];
+            return response()->json($response);
+
+            }
+
+           
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Tatizo la Kimtandao.',
+                'error' => $error,
+            ]);
+        }
+
+    }
+
+    public function declarationSectionsRequirements(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'section_secure_token' =>  ['required','string'],
+            'member_id' =>  ['required','integer'],
+            'is_pl' =>  ['required','integer'],
+            'user_declaration_id' =>  ['required','string'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        // try{
+
+            
+            $section = Section::with([
+                'requirements' => function($query)
+                {
+                $query->with([
+                    'requirement' => function($qry){
+                        $qry->select('id','label','field_name','field_type','end_point');
+                    }
+                ])->orderby('requirement_flow','asc')->select('id','secure_token','section_id','requirement_id','requirement_flow');
+                }
+            ])->join('declaration_sections', 'declaration_sections.id', '=', 'sections.id')
+                // ->where('sections.secure_token','=',$request->section_secure_token)
+                ->where('sections.secure_token','=',$request->section_secure_token)
+                ->first();
+
+                $section = Section::where('sections.secure_token','=',$request->section_secure_token)->first();
+                $requirements = Section_requirement::with('requirement')->orderby('requirement_flow','asc')->where('section_id',$section->id)->get();
+                
+                $requirements_data = [];
+                foreach($requirements as $requirement){
+                    $requirement_fields = $requirement->requirement;
+                    if($requirement_fields->field_type=="select"){
+                        $url="http://41.59.227.219:9003/".$requirement_fields->end_point;
+                        $response = Http::get($url)->json();
+                    
+                    $requirements_data[]=$requirement;
+                 }
+                }
+                // dd($requirements_data);
+
+                if($requirements){
+                    $section->requirements= $requirements;
+                }else{
+                $section->requirements= null;
+                }
+
+                $data = DB::table(strtolower($section->table_name))
+                            ->where('member_id','=',$request->member_id)
+                            ->where('user_declaration_id','=',$request->user_declaration_id)
+                            ->where('is_pl','=',$request->is_pl)
+                            ->get()
+                            ->map(function ($item) use ($section) {
+                                $item->table_name = $section->table_name;
+                                return $item;
+                            });
+                            // dd(strtolower($request->member_id));
+                if($data){
+                    $section->section_data= $data;
+                }else{
+                $section->section_data= null;
+                }
+                
+                $dataCount = count( $section ->section_data);
+
+                //         $section = Section::where('secure_token',$secure_token)->first();
+            //         $section_data = Section_requirement::where()->get();
+            // dd($section);
+
+            $response = ['statusCode' => 200, 'section' => $section,'dataCount'=>$dataCount];
+
+            return response()->json($response, 200);
+
+
+        // } catch (Exception $error) {
+        //     return response()->json([
+        //         'statusCode' => 402,
+        //         'message' => 'Tatizo la Kimtandao.',
+        //         'error' => $error,
+        //     ]);
+        // }
+    }
+
+    public function sectionRequirementsForm($secure_token)
+    {
+
+        $section = Section::with([
+            'requirements' => function($query)
+            {
+               $query->with([
+                   'requirement' => function($qry){
+                      $qry->select('id','label','field_name','field_type','end_point');
+                   }
+               ])->orderby('requirement_flow','asc')->select('id','secure_token','section_id','requirement_id','requirement_flow');
+            }
+        ])->join('declaration_sections', 'declaration_sections.id', '=', 'sections.id')
+            ->where('sections.secure_token','=',$secure_token)
+            ->first();
+            $data = DB::table(strtolower($section->table_name))
+            ->get();
+            
+            $section->section_data= $data;
+            $dataCount = count( $section ->section_data);
+
+            //         $section = Section::where('secure_token',$secure_token)->first();
+           //         $section_data = Section_requirement::where()->get();
+          // dd($section);
+
+        $response = ['statusCode' => 200, 'section' => $section,'dataCount'=>$dataCount];
+
+        return response()->json($response, 200);
+    }
+
+    public function deleteDeclaration(Request $request): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'user_declaration_id' => 'required|integer',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        try{
+
+            $data = User_declaration::where('user_id', '=', auth()->user()->id)
+                    ->where('id', '=', $request->user_declaration_id)->first();
+
+            $data->is_deleted = true;
+            $data->save(); 
+
+            $declaration = Declaration_type::where('id',$data->declaration_type_id)->first();
+
+            $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kufuta '.$declaration->type.' kikamilifu'];
+
+            return response()->json($response, 200);
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function declarationSave(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'declaration_type' => 'required|integer',
+            'sections' => 'required|array',
+            'flag' => 'required|string',
+            'member_id' => 'required|integer',
+            'is_pl' => 'required|integer',
+        ]);
+
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        $today = Carbon::now();
+
+        try {
+            $declaration = Declaration_type::find($request->input('declaration_type'));
+
+            $year = Financial_year::where('is_active', '=', true)->first();
+
+            $check = User_declaration::where('id', '=', $request->user_declaration_id)->first();
+
+            $sections = $request->input('sections');
+
+            $check->has_password = false;
+            $check->submitted_date = $today;
+            
+            $check->save();
+
+        return $this->insertSections($sections, $check, $request);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+
+
+    }
+
+    public function updateSection(Request $request,$id)
+    {
+
+     //       return $request->getContent();
 
         $table = strtolower($request['section']['table']);
         $data = $request['section']['data'];
@@ -247,82 +922,144 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
-
-        $validator = Validator::make($request->all(), [
+	 $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
             'flag' => 'required|string',
         ]);
-
+    
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
         }
-
+    
         $declaration = Declaration_type::find($request->input('declaration_type'));
-
+    
         $year = Financial_year::where('is_active', '=', true)->first();
-
+    
         $data = User_declaration::where('user_id', '=', auth()->user()->id)
             ->where('financial_year_id', '=', $year->id)
             ->where('declaration_type_id', '=', $declaration->id)
             ->first();
-
-        $data->update([
-            'flag' => $request->input('flag')
-        ]);
-
-        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma '.$declaration->type.' Sekretarieti ya maadili, Ahsante.', 'data' => $data];
-
-        return response()->json($response, 200);
+    
+        if ($data) {
+            $data->update([
+                'flag' => $request->input('flag')
+            ]);
+    
+            $response = [
+                'statusCode' => 200,
+                'message' => 'Umefanikiwa kutuma '.$declaration->type.' Sekretarieti ya maadili, Ahsante.',
+                'data' => $data
+            ];
+        } else {
+            $response = [
+                'statusCode' => 404,
+                'message' => 'User declaration haipatikani.'
+            ];
+        }
+    
+        return response()->json($response);
     }
 
-    public function previewAdf(Request $request): JsonResponse
+    public function previewAdf(Request $request)
     {
-
         $year = Financial_year::where('is_active', '=', 1)->first();
-
-        $declaration = User_declaration::with([
+          $declaration = User_declaration::with([
             'declaration_type' => function ($query) {
                 $query->with([
                     'sections' => function ($qry) {
                         $qry->select('section_name', 'table_name');
-
                     }
                 ]);
             },
             'user' => function ($query) {
-                $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
+
+                $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
+                $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
+                $query->leftjoin('sexes','sexes.id','=','users.sex_id');
+               
+                
+                
+                $query->leftjoin('countries AS current_country', function ($join) {
+                    $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
+                });
+                $query->leftjoin('wards', function ($join) {
+                    $join->on('wards.id', '=', DB::raw('CAST(users.ward_current AS bigint)'));
+                });
+                $query->leftjoin('districts', function ($join) {
+                    $join->on('districts.id', '=', DB::raw('CAST(users.district_current AS bigint)'));
+                });
+                $query->leftjoin('regions', function ($join) {
+                    $join->on('regions.id', '=', DB::raw('CAST(users.region_current AS bigint)'));
+                });
+                $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
+                               'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
+                               'current_country.country AS country_current_name',);
             },
         ])
-            ->where('declaration_type_id','=', $request->declaration_type)
-            ->where('user_id', '=', auth()->user()->id)
-            ->where('financial_year_id', '=', $year->id)
+            ->where('id','=', $request->user_declaration_id)
+            ->where('is_deleted', '=', false)
             ->first();
-
         if ($declaration == null){
-
             $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
-
             return response()->json($response, 200);
         }
 
         foreach ($declaration->declaration_type->sections as $section) {
-
+            // return  $section->table_name;
             $data = DB::table(strtolower($section->table_name))
-                ->get();
+            ->where('user_declaration_id', $declaration->id)
+            ->get()
+            ->map(function ($item) {
+                if ($item->is_pl == 0) {
+                    $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                             ->where('family_members.status_id','=',1)
+                             ->where('family_members.id','=',$item->member_id)
+                             ->select('family_member_types.member_sw','family_members.*')
+                             ->first();
 
-            $requirements = DB::table('requirements')
+                             if($members){
+                                $item->member_type = $members->member_sw;
+                                $item->member_first_name = $members->first_name;
+                                $item->member_middle_name = $members->middle_name;
+                                $item->member_last_name = $members->last_name;
+
+                             }else{
+                                $item->member_type = null;
+                             }
+                }else{
+                    $item->member_type = "pl";
+                }
+                return $item;
+            });
+        
+           $requirements = DB::table('requirements')
                 ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
                 ->join('sections','section_requirements.section_id','=','sections.id')
                 ->where('sections.table_name','=',$section->table_name)
                 ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
                 ->get();
-
-            $section->section_data = $data;
+                
+            $section->section_data= $data;
             $section->requirements = $requirements;
         }
-
-        $response = ['statusCode' => 200, 'declaration' => $declaration, 'year' => $year->year];
-
+        $taarifa_za_ajira = Sectiontaarafa478::where('user_id',auth()->user()->id)
+                                              ->with('kata_sasa_name')
+                                              ->with('wilaya_sasa_name')
+                                              ->with('mkoa_sasa_name')
+                                              ->with('userDeclaration')
+                                              ->with('mwaajiri')
+                                              ->with('ainaya_ajira')
+                                              ->with('marital_status')
+                                              ->with('title_name')
+                                              ->with('councils')
+                                              ->with('village')
+                                              ->first();
+        $response = ['statusCode' => 200, 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
         return response()->json($response, 200);
     }
 
@@ -330,57 +1067,269 @@ class userDeclarationController extends Controller
     {
 
         $validator = Validator::make($request->all(), [
-            'adf_token' =>  ['required','uuid'],
+            'user_declaration_id' =>  ['required'],
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors());
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
         }
 
 
 
-        $adf_token = $request->input('adf_token');
+        $user_declaration_id = $request->input('user_declaration_id');
 
-        $update = User_declaration::where('secure_token','=',$adf_token)->first();
+        $update = User_declaration::where('id','=',$user_declaration_id)->first();
+
 
         if ($update == null){
 
-            $response = ['statusCode' => 400, 'message' => 'ADF token '.$adf_token.' haipo, Ahsante'];
+            $response = ['statusCode' => 400, 'message' => 'Tamko namba'.$user_declaration_id.' haipo, Ahsante'];
             return response()->json($response, 200);
         }
 
-        $update->is_confirmed = true;
-        $update->save();
+        $user_declaration = $update->id;
 
-        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kuthibitisha, sasa unaweza kuwasilisha tamko hili Sekretarieti ya maadili, Ahsante','data' => $update];
+        if($update->has_password == false){
+
+        $update->has_password = true;
+
+        $password = $this->generateRandomString(10);
+
+            $download = Declaration_download::create([
+                'secure_token' => Str::uuid(),
+                'downloader_secure_token' => auth()->user()->secure_token,
+                'user_declaration_id' => $user_declaration,
+                'password' => $password
+            ]);
+
+        }
+
+        $update->is_confirmed = true;
+        $update->save(); 
+
+        $password = Declaration_download::where('user_declaration_id',$user_declaration)->orderByDesc('id')->first()->password;
+     
+        $response = ['statusCode' => 200, 
+        'password' => $password, 
+        'message' => 'Umefanikiwa kuthibitisha, sasa unaweza kuwasilisha tamko hili Sekretarieti ya maadili, Ahsante, Tafadhali tumia nywila hii kupakua tamko',
+        'data' => $update];
         return response()->json($response, 200);
+    }
+
+    public function generateRandomString($length) {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+        $charactersLength = strlen($characters);
+        $randomString = '';
+    
+        for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+        }
+    
+        return $randomString;
     }
 
     public function downloadAdf(Request $request): JsonResponse
     {
+        $year = Financial_year::where('is_active', '=', 1)->first();
+          $declaration = User_declaration::with([
+            'declaration_type' => function ($query) {
+                $query->with([
+                    'sections' => function ($qry) {
+                        $qry->select('section_name', 'table_name');
+                    }
+                ]);
+            },
+            'user' => function ($query) {
 
-        $validator = Validator::make($request->all(), [
-            'user_declaration' =>  ['required','integer'],
-            'password' =>  ['required','string','min:8'],
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
+                $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
+                $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
+                $query->leftjoin('sexes','sexes.id','=','users.sex_id');
+                $query->leftjoin('countries AS birth_country', function ($join) {
+                    $join->on('birth_country.id', '=', DB::raw('CAST(users.country_birth AS bigint)'));
+                });
+                
+                $query->leftjoin('countries AS current_country', function ($join) {
+                    $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
+                });
+                $query->leftjoin('wards', function ($join) {
+                    $join->on('wards.id', '=', DB::raw('CAST(users.ward_current AS bigint)'));
+                });
+                $query->leftjoin('districts', function ($join) {
+                    $join->on('districts.id', '=', DB::raw('CAST(users.district_current AS bigint)'));
+                });
+                $query->leftjoin('regions', function ($join) {
+                    $join->on('regions.id', '=', DB::raw('CAST(users.region_current AS bigint)'));
+                });
+                $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
+                               'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
+                               'birth_country.country AS country_birth_name','current_country.country AS country_current_name',);
+            },
+        ])
+            ->where('id','=', $request->user_declaration_id)
+            ->where('user_id', '=', auth()->user()->id)
+            ->where('financial_year_id', '=', $year->id)
+            ->first();
+            // dd($declaration);
+        if ($declaration == null){
+            $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
+            return response()->json($response, 200);
         }
 
+        foreach ($declaration->declaration_type->sections as $section) {
+            // return  $section->table_name;
+            $data = DB::table(strtolower($section->table_name))
+            ->where('user_declaration_id', $declaration->id)
+            ->get()
+            ->map(function ($item) {
+                if ($item->is_pl == 0) {
+                    $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                             ->where('family_members.status_id','=',1)
+                             ->where('family_members.id','=',$item->member_id)
+                             ->select('family_member_types.member_sw','family_members.*')
+                             ->first();
 
-        $user_declaration = $request->input('user_declaration');
-        $password = $request->input('password');
+                             if($members){
+                                $item->member_type = $members->member_sw;
+                                $item->member_first_name = $members->first_name;
+                                $item->member_middle_name = $members->middle_name;
+                                $item->member_last_name = $members->last_name;
 
-        $download = Declaration_download::create([
-            'secure_token' => Str::uuid(),
-            'downloader_secure_token' => auth()->user()->secure_token,
-            'user_declaration_id' => $user_declaration,
-            'password' => encrypt($password)
-        ]);
+                             }else{
+                                $item->member_type = null;
+                             }
+                }else{
+                    $item->member_type = "pl";
+                }
+                return $item;
+            });
+        
+           $requirements = DB::table('requirements')
+                ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                ->join('sections','section_requirements.section_id','=','sections.id')
+                ->where('sections.table_name','=',$section->table_name)
+                ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->get();
+                
+            $section->section_data= $data;
+            $section->requirements = $requirements;
+        }
+        $taarifa_za_ajira = Sectiontaarafa478::where('user_id',auth()->user()->id)
+                                              ->with('kata_sasa_name')
+                                              ->with('wilaya_sasa_name')
+                                              ->with('mkoa_sasa_name')
+                                              ->with('userDeclaration')
+                                              ->with('mwaajiri')
+                                              ->with('ainaya_ajira')
+                                              ->with('marital_status')
+                                              ->with('title_name')
+                                              ->first();
 
-        $response = ['statusCode' => 200, 'password' => decrypt($download->password)];
+        $password = Declaration_download::where('user_declaration_id',$request->user_declaration_id)->orderByDesc('id')->first()->password;
 
+        $response = ['statusCode' => 200, 'password' => $password , 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
+        return response()->json($response, 200);
+    }
+
+    public function downloadAdfAuth(Request $request): JsonResponse
+    {
+        $year = Financial_year::where('is_active', '=', 1)->first();
+          $declaration = User_declaration::with([
+            'declaration_type' => function ($query) {
+                $query->with([
+                    'sections' => function ($qry) {
+                        $qry->select('section_name', 'table_name');
+                    }
+                ]);
+            },
+            'user' => function ($query) {
+
+                $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
+                $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
+                $query->leftjoin('sexes','sexes.id','=','users.sex_id');
+                $query->leftjoin('countries AS birth_country', function ($join) {
+                    $join->on('birth_country.id', '=', DB::raw('CAST(users.country_birth AS bigint)'));
+                });
+                
+                $query->leftjoin('countries AS current_country', function ($join) {
+                    $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
+                });
+                $query->leftjoin('wards', function ($join) {
+                    $join->on('wards.id', '=', DB::raw('CAST(users.ward_current AS bigint)'));
+                });
+                $query->leftjoin('districts', function ($join) {
+                    $join->on('districts.id', '=', DB::raw('CAST(users.district_current AS bigint)'));
+                });
+                $query->leftjoin('regions', function ($join) {
+                    $join->on('regions.id', '=', DB::raw('CAST(users.region_current AS bigint)'));
+                });
+                $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
+                               'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
+                               'birth_country.country AS country_birth_name','current_country.country AS country_current_name',);
+            },
+        ])
+            ->where('id','=', $request->user_declaration_id)
+            ->where('financial_year_id', '=', $year->id)
+            ->first();
+        if ($declaration == null){
+            $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
+            return response()->json($response, 200);
+        }
+
+        foreach ($declaration->declaration_type->sections as $section) {
+            // return  $section->table_name;
+            $data = DB::table(strtolower($section->table_name))
+            ->where('user_declaration_id', $declaration->id)
+            ->get()
+            ->map(function ($item) {
+                if ($item->is_pl == 0) {
+                    $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                             ->where('family_members.status_id','=',1)
+                             ->where('family_members.id','=',$item->member_id)
+                             ->select('family_member_types.member_sw','family_members.*')
+                             ->first();
+
+                             if($members){
+                                $item->member_type = $members->member_sw;
+                                $item->member_first_name = $members->first_name;
+                                $item->member_middle_name = $members->middle_name;
+                                $item->member_last_name = $members->last_name;
+
+                             }else{
+                                $item->member_type = null;
+                             }
+                }else{
+                    $item->member_type = "pl";
+                }
+                return $item;
+            });
+        
+           $requirements = DB::table('requirements')
+                ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                ->join('sections','section_requirements.section_id','=','sections.id')
+                ->where('sections.table_name','=',$section->table_name)
+                ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->get();
+                
+            $section->section_data= $data;
+            $section->requirements = $requirements;
+        }
+        $taarifa_za_ajira = Sectiontaarafa478::where('user_id',$declaration->user_id)
+                                              ->with('kata_sasa_name')
+                                              ->with('wilaya_sasa_name')
+                                              ->with('mkoa_sasa_name')
+                                              ->with('userDeclaration')
+                                              ->with('mwaajiri')
+                                              ->with('ainaya_ajira')
+                                              ->with('marital_status')
+                                              ->with('title_name')
+                                              ->first();
+        $password = Declaration_download::where('user_declaration_id',$declaration->id)->first();
+        $response = ['statusCode' => 200, 'password' => decrypt($password->password) , 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
         return response()->json($response, 200);
     }
 
@@ -397,12 +1346,43 @@ class userDeclarationController extends Controller
             },
         ])
         ->where('downloader_secure_token','=',auth()->user()->secure_token)
-            ->select('id','secure_token','user_declaration_id','password')
             ->get();
 
         $response = ['statusCode' => 200, 'data' => $download_histories];
 
         return response()->json($response, 200);
+    }
+
+    public function ADFSubmittedList(){
+
+        try {
+        $declaration = User_declaration::where('user_id', '=', auth()->user()->id)->where('flag','=','submit')->get();
+
+            if ($declaration) {
+                return response()->json([
+                    'statusCode' => 400,
+                    'message' => 'Orodha ya matamko uliyotuma',
+                    'declaration' => $declaration,
+                    'error' => false,
+                ]);
+        
+                
+            } else{
+
+                return response()->json([
+                    'statusCode' => 400,
+                    'message' => 'Hauna Tamko ulilotuma',
+                    'declaration' => null,
+                    'error' => false,
+                ]);
+            }
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
     }
 
     public function getDeclarationReceipt(Request $request): JsonResponse
@@ -433,6 +1413,54 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function sectionDataDelete(Request $request): JsonResponse
+    {
+
+        $validator = Validator::make($request->all(), [
+            'data_id' => 'required|integer',
+            'table_name' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        try{
+
+        $data = DB::table(strtolower($request->table_name))->where('id',$request->data_id)->first();
+        $data_delete = DB::table(strtolower($request->table_name))->where('id',$request->data_id)->delete();
+
+        $has_data_on_section = DB::table(strtolower($request->table_name))
+                        ->where('member_id','=',$data->member_id)
+                        ->where('user_declaration_id','=',$data->user_declaration_id)
+                        ->where('is_pl','=',$data->is_pl)
+                        ->get();
+
+        if($has_data_on_section->isEmpty()){
+            $updateResult = DB::table('user_declarations_lookup')
+            ->where('user_declaration_id', $data->user_declaration_id)
+            ->where('pl_id', auth()->user()->id)
+            ->where('family_member_id', $data->member_id)
+            ->decrement('declaration_section_completed'); // decrement the field by 1
+        }
+
+        $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kufuta taarifa ya section kikamilifu'];
+
+        return response()->json($response, 200);
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
     private function generateAdfNumber($declarationCode, $year): string
     {
         return 'ADF' . '-' . $declarationCode . '-' . $year . '-' . mt_rand(100, 999);
@@ -449,7 +1477,7 @@ class userDeclarationController extends Controller
      * @param $check
      * @return JsonResponse
      */
-    private function insertSections(mixed $sections, $check): JsonResponse
+    private function insertSections(mixed $sections, $check, $request): JsonResponse
     {
 
         $array = [];
@@ -457,18 +1485,48 @@ class userDeclarationController extends Controller
         foreach ($sections as $section) {
 
 
-            $table = strtolower($section['section']['table']);
+            // $table = strtolower($section['section']['table']);
+               $table = strtolower(trim($section['section']['table']));
             if (count($section['section']['data']) > 0) {
 
                 foreach ($section['section']['data'] as $values) {
+                    // $table = strtolower($section['section']['table']);
+                    $table = strtolower(trim($section['section']['table']));
+
 
                     $new_object = new stdClass();
                     $object = new stdClass();
-                    $object->user_declaration_id = $check->id;
+                    $object->user_declaration_id = $request->user_declaration_id;
+                    $object->member_id = $request->member_id;
+                    $object->is_pl = $request->is_pl;
                     foreach ($values as $key => $value) {
+                        $key=strtolower(trim($key));
                         $object->$key = $value;
                         $new_object = $object;
+
+                        if (!Schema::hasColumn($table, $key)) {
+                            // Column does not exist, so create it
+                            Schema::table($table, function ($table) use ($key) {
+                                $table->string($key);
+                            });
+                        }
                     }
+                   
+
+                    $has_data_on_section = DB::table(strtolower($table))
+                                            ->where('member_id','=',$request->member_id)
+                                            ->where('user_declaration_id','=',$request->user_declaration_id)
+                                            ->where('is_pl','=',$request->is_pl)
+                                            ->get();
+
+                    if($has_data_on_section->isEmpty()){
+                        $updateResult = DB::table('user_declarations_lookup')
+                        ->where('user_declaration_id', $request->user_declaration_id)
+                        ->where('pl_id', auth()->user()->id)
+                        ->where('family_member_id', $request->member_id)
+                        ->increment('declaration_section_completed'); // Increment the field by 1
+                    }
+
 
                     $array[] = $new_object;
 
@@ -476,10 +1534,27 @@ class userDeclarationController extends Controller
                     $row = json_decode($encode, true);
 
                      DB::table($table)->insert($row);
+                    
+                     if($request->is_pl == 1){
+                        $update_UserDeclarationsLookup = UserDeclarationsLookup::where('user_declaration_id',$request->user_declaration_id)
+                                                         ->where('pl_id',auth()->user()->id)
+                                                         ->where('family_member_id',auth()->user()->id)
+                                                         ->first();
+                     }else{
+                        $update_UserDeclarationsLookup = UserDeclarationsLookup::where('user_declaration_id',$request->user_declaration_id)
+                                                         ->where('pl_id',auth()->user()->id)
+                                                         ->where('family_member_id',$request->member_id)
+                                                         ->first();
+                     }
+                     
 
                     $data = DB::table($table)->orderBy('id','DESC')->first();
 
-                    $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 'table' => $table,'data' => $data];
+
+                    $response = ['statusCode' => 200, 
+                    'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 
+                    'table' => $table,
+                    'data' => $data];
 
                     return response()->json($response);
                 }
@@ -488,5 +1563,7 @@ class userDeclarationController extends Controller
         }
 
     }
+
+
 
 }

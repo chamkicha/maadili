@@ -99,7 +99,7 @@ class AuthenticationController extends Controller
 
         if ($verify == null) {
 
-            return "Account yako aitambuliki";
+            return "Account yako haitambuliki";
         }
 
         $verify->verified_at = Carbon::now()->format('Y-m-d H:s:i');

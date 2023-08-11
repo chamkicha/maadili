@@ -19,22 +19,60 @@ class User extends Authenticatable
      * @var array<int, string>
      */
     protected $fillable = [
+        'staff_id',
+        'file_number',
         'first_name',
         'middle_name',
         'last_name',
-        'last_name',
-        'nida',
+        'nida' ,
+        'phone_number',
+        'email',
+        'otp' ,
         'nationality',
         'po_box',
-        'village',
+        'councils_id',
         'ward_id',
         'marital_status_id',
-        'sex_id',
         'date_of_birth',
-        'email',
-        'password',
+        'verified_at',
+        'is_active',
         'is_password_changed',
-        'aka'
+        'password',
+        'remember_token',
+        'created_at',
+        'updated_at',
+        'undefined',
+        'aka',
+        'zone_id',
+        'title_id',
+        'tin_number' ,
+        'house_no' ,
+        'sex' ,
+        'hadhi_id',
+        'phone_number2' ,
+        'passport' ,
+        'profile_picture',
+        'residence_village',
+        'residence_street',
+        'ward_nida',
+        'region_nida',
+        'district_nida',
+        'village_nida',
+        'signature_image',
+        'village',
+        'sex_id',
+        'country_birth',
+        'country_current',
+        'check_number',
+        'ward_current' ,
+        'district_current' ,
+        'region_current' ,
+        'po_box_current' ,
+        'physical_address_current',
+        'kijiji_mtaa_shehia',
+        'kijiji_mtaa_shehia_current',
+        'village_id'
+	   
     ];
 
     /**
@@ -57,6 +95,20 @@ class User extends Authenticatable
     ];
 
 
+    
+
+    public function councils()
+    {
+
+        return $this->BelongsTo(Council::class,'councils_id','id');
+    }
+
+    public function village()
+    {
+
+        return $this->BelongsTo(Village::class,'village_id','id');
+    }
+
     public function family_members(): HasMany
     {
 
@@ -67,5 +119,56 @@ class User extends Authenticatable
     {
 
         return $this->hasMany(User_declaration::class,'user_id','id');
+    }
+
+	  public function zone()
+    {
+        return $this->BelongsTo(Zone::class,'zone_id','id');
+    }
+    public function staff()
+    {
+        return $this->BelongsTo(Staff::class,'staff_id','id');
+    }
+    public function marital()
+    {
+        return $this->BelongsTo(Marital_status::class,'marital_status_id','id');
+    }
+    public function sex()
+    {
+        return $this->BelongsTo(Sex::class,'sex_id','id');
+    }
+
+    public function countryBirthInfo()
+    {
+        return $this->BelongsTo(Country::class,'country_birth','id');
+    }
+
+    public function countryCurrentInfo()
+    {
+        return $this->BelongsTo(Country::class,'country_current','id');
+    }
+
+    public function wardCurrentInfo()
+    {
+        return $this->BelongsTo(Ward::class,'ward_current','id');
+    }
+
+    public function districtCurrentInfo()
+    {
+        return $this->BelongsTo(District::class,'district_current','id');
+    }
+
+    public function regionCurrentInfo()
+    {
+        return $this->BelongsTo(Region::class,'region_current','id');
+    }
+
+    public function hadhi()
+    {
+        return $this->BelongsTo(Hadhi::class,'hadhi_id','id');
+    }
+    public function title()
+    {
+        return $this->BelongsTo(Title::class,'title_id','id');
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use DB;
 
 class Declaration_type extends Model
 {
@@ -15,7 +16,9 @@ class Declaration_type extends Model
     {
 
         return $this->belongsToMany(Section::class,'declaration_sections');
+        
     }
+
 
 
 }

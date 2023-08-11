@@ -20,12 +20,22 @@ class Family_member extends Model
         'middle_name',
         'last_name',
         'date_of_birth',
-        'occupation'
+        'occupation',
+        'phone_no',
+        'taasisi_id',
+        'tarehe_ya_kuajiriwa',
+        'taasisi_other'
     ];
 
     public function member_type(): BelongsTo
     {
 
         return $this->belongsTo(Family_member_type::class,'family_member_type_id','id');
+    }
+
+    public function genderName()
+    {
+
+        return $this->belongsTo(Sex::class,'sex_id','id');
     }
 }
