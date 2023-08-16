@@ -43,6 +43,18 @@ class lookUpDataController extends Controller
 
     }
 
+    public function leadersList(){
+        $leadersList = User::where('is_active', '=', true)
+                ->selectRaw('id, CONCAT(first_name, \' \', COALESCE(middle_name, \'\'), \' \', last_name) AS full_name, phone_number, sex')
+                ->get();
+
+
+        $response = ['leadersList' => $leadersList];
+
+        return response()->json($response,200);
+
+    }
+
     public function hadhi(){
 
 
@@ -205,18 +217,6 @@ class lookUpDataController extends Controller
             }
 
 
-            return response()->json([
-                'statusCode' => 200,
-                'message' => 'Ndugu kiongozi tafadhali chagua aina ya Tamko ili uanze kujaza tamko.',
-                'error' => false,
-            ]);
-        }else{
-
-            return response()->json([
-                'statusCode' => 400,
-                'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
-                'error' => true,
-            ]);
         }
 
 

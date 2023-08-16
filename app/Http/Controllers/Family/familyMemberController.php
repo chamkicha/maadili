@@ -52,7 +52,7 @@ class familyMemberController extends Controller
             'phone_no' => $request->input('phone_no'),
             'taasisi_id' => $request->input('taasisi_id'),
             'taasisi_other' => $request->input('taasisi_other'),
-            'tarehe_ya_kuajiriwa' => $request->input('tarehe_ya_kuajiriwa')
+            'tarehe_ya_kuajiriwa' => $request->input('tarehe_ya_kuajiriwa'),
             
 
         ]);
@@ -93,7 +93,7 @@ class familyMemberController extends Controller
     public function getFamilyMembers(): JsonResponse
     {
 
-        $members = Family_member::with(['member_type','genderName'])
+        $members = Family_member::with(['member_type','genderName','taasisi'])
         ->where('user_id','=',auth()->user()->id)
         ->where('status_id','=',1)
         ->get();

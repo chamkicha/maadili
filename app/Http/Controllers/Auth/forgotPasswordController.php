@@ -38,7 +38,7 @@ class forgotPasswordController extends Controller
         else{
 
             return response()
-                ->json(['statusCode' => 401, 'message' => 'Username ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza username sahihi.'], 401);
+                ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza jina la mtumiaji sahihi.'], 401);
         }
 
         $request->merge([
@@ -55,13 +55,13 @@ class forgotPasswordController extends Controller
 
         if ($user == null){
 
-            $response = ['statusCode' => 0, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
+            $response = ['statusCode' => 400, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
             return response()->json($response,200);
         }
 
         $this->sendMessage($user);
 
-        $response = ['statusCode' => 1,'message' => 'Ujumbe wa kubadilisha neno siri umetumwa kikamilifu kwenye namba yako ya simu'];
+        $response = ['statusCode' => 200,'message' => 'Ujumbe wa kubadilisha neno siri umetumwa kikamilifu kwenye namba yako ya simu'];
         return response($response, 200);
 
     } catch (Exception $error) {
@@ -97,15 +97,15 @@ class forgotPasswordController extends Controller
         $user->password = Hash::make($request->input('password'));
         $user->save();
 
-        $response = ['statusCode' => 1,'message' => 'Umefanikiwa kubadili neno siri kikamilifu'];
+        $response = ['statusCode' => 200,'message' => 'Umefanikiwa kubadili neno siri kikamilifu'];
         return response($response, 200);
     }
 
     private function sendMessage($user) {
 
-
+        $message = "Ndugu kiongozi. ".$user->first_name.' '.$user->middle_name.' '.$user->last_name ." Pokea taarifa za kukuwezesha kuingia kwenye mfumo wa ODS unaopatikana kupitia anuani https://ods.maadili.go.tz au tovuti ya www.maadili.go.tz , Username: ".$user->nida.", Password: ".strtoupper($user->last_name).". Taarifa hizi ni za siri kwa ajili yako.";
         $response = Http::asForm()->post('http://41.59.227.219:9003/emis/send-sms', [
-            'message' => $user->first_name.' '.$user->middle_name.' '.$user->last_name.' '.'  username yako ni  : '.$user->nida.' na  password yako ni :'.strtoupper($user->last_name).' ya kuingilia kwenye mfumo wa ODS',
+            'message' => $message,
             'phoneNumber' => $user->phone_number,
         ]);
     }

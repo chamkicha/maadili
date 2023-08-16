@@ -24,7 +24,9 @@ class Family_member extends Model
         'phone_no',
         'taasisi_id',
         'tarehe_ya_kuajiriwa',
-        'taasisi_other'
+        'taasisi_other',
+        'nida',
+        'tin_number'
     ];
 
     public function member_type(): BelongsTo
@@ -37,5 +39,13 @@ class Family_member extends Model
     {
 
         return $this->belongsTo(Sex::class,'sex_id','id');
+    }
+
+
+
+    public function taasisi()
+    {
+
+        return $this->belongsTo(Office::class,'taasisi_id','id');
     }
 }

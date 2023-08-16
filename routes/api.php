@@ -87,18 +87,21 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('taarifa', 'getUser');
     });
 
-  Route::controller(lookUpDataController::class)->group(function () {
-    Route::get('family-member-type', 'familyMemberType');
-    Route::get('menuLookup', 'menuLookup');
-  });
-
   Route::controller(rejestaZawadiController::class)->group(function () {
     Route::get('rejesta-list', 'index');
-    Route::get('save-rejesta', 'store');
+    Route::post('add-rejesta', 'store');
     Route::get('view-rejesta', 'view');
-    Route::get('update-rejesta/{rejesta_id?}', 'update');
-    Route::get('delete-rejesta/{rejesta_id?}', 'update');
+    Route::get('edit-rejesta/{rejesta_id?}', 'edit');
+    Route::post('update-rejesta/{rejesta_id?}', 'update');
+    Route::get('delete-rejesta/{rejesta_id?}', 'delete');
   });
+
+
+    Route::controller(lookUpDataController::class)->group(function () {
+    Route::get('family-member-type', 'familyMemberType');
+    Route::get('menuLookup', 'menuLookup');
+    Route::get('leadersList', 'leadersList');
+    });
 
 });
 

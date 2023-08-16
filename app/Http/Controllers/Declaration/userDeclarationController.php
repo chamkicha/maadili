@@ -27,6 +27,7 @@ use App\Models\Sectiontaarafa478;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
+use App\Models\Menu_lookup;
 
 class userDeclarationController extends Controller
 {
@@ -231,8 +232,6 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
-
-
     public function getSectionsList(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -413,9 +412,100 @@ class userDeclarationController extends Controller
 
     }
 
+    public function menuLookupCheck(){
+        $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
+        // dd($menu_lookup->stage_three);
+    
+        if($menu_lookup){
+    
+            if($menu_lookup->stage_one === false){
+                return response()->json([
+                    'statusCode' => 400,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+    
+            if($menu_lookup->stage_two === false){
+                $user = User::where('id',auth()->user()->id)->first();
+                if ($user !== null && ($user->maritial_status_id === 2 || $user->maritial_status_id === 3)) {
+    
+                return response()->json([
+                    'statusCode' => 401,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za wategemezi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+               }
+            }
+    
+            if($menu_lookup->stage_three === false){
+                return response()->json([
+                    'statusCode' => 402,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za ajira ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+    
+    
+        }else{
+            
+            return response()->json([
+                'statusCode' => 400,
+                'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                'error' => false,
+            ]);
+        }
+    
+    
+    }
+
     
     public function DeclarationCreateNyongezaPunguzo(Request $request)
     {
+        
+        $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
+        // dd($menu_lookup->stage_three);
+    
+        if($menu_lookup){
+    
+            if($menu_lookup->stage_one === false){
+                return response()->json([
+                    'statusCode' => 500,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+    
+            if($menu_lookup->stage_two === false){
+                $user = User::where('id',auth()->user()->id)->first();
+                if ($user !== null && ($user->maritial_status_id === 2 || $user->maritial_status_id === 3)) {
+    
+                return response()->json([
+                    'statusCode' => 501,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za wategemezi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+               }
+            }
+    
+            if($menu_lookup->stage_three === false){
+                return response()->json([
+                    'statusCode' => 502,
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za ajira ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+            }
+    
+    
+        }else{
+            
+            return response()->json([
+                'statusCode' => 500,
+                'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',
+                'error' => false,
+            ]);
+        }
+    
 
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
@@ -536,6 +626,9 @@ class userDeclarationController extends Controller
 
             foreach ($sections as $section) {
 
+
+                if($section->require_nyongeza == true){
+
                 $table_name = strtolower($section->table_name);
 
                 $section_datas = DB::table($table_name)
@@ -555,6 +648,7 @@ class userDeclarationController extends Controller
                     }
 
                     $update_is_nyongeza = User_declaration::where('id', '=', $user_declaration_id)->update(['is_nyongeza' => true]);
+                }
 
             }
 
@@ -611,7 +705,6 @@ class userDeclarationController extends Controller
                         ->where('user_declarations_lookup.user_declaration_id','=',$user_declaration_id)
                         ->select([
                             'family_members.*', 
-                            'user_declarations_lookup.declaration_section_count',
                             DB::raw('0 as is_pl'),
                             ])
                         ->get();
@@ -624,18 +717,19 @@ class userDeclarationController extends Controller
                                 'users.middle_name',
                                 'users.last_name',
                                 'users.nationality',
-                                'user_declarations_lookup.declaration_section_count',
                                 DB::raw('1 as is_pl'),
                              
                                 ])
                             ->first();
+            $declaration_section_count = sectioncountAll($user_declaration_id);
 
             if ($public_leader) {
                 // Call your function and get additional data
-                $additionalData = sectioncount($user_declaration_id, $public_leader->id, '1');
+                $additionalDataLeader = sectioncount($user_declaration_id, auth()->user()->id, '1');
             
                 // Add the additional data to the result
-                $public_leader->declaration_section_completed = $additionalData;
+                $public_leader->declaration_section_completed = $additionalDataLeader;
+                $public_leader->declaration_section_count = $declaration_section_count;
             }
             
             if ($members) {
@@ -646,7 +740,8 @@ class userDeclarationController extends Controller
                 
                     // Add the additional data to the member object
                     $member->declaration_section_completed = $additionalData;
-                }
+                    $member->declaration_section_count = $declaration_section_count;
+            }
 
                 $response = [
                     'statusCode' => 200,
@@ -722,8 +817,8 @@ class userDeclarationController extends Controller
                 foreach($requirements as $requirement){
                     $requirement_fields = $requirement->requirement;
                     if($requirement_fields->field_type=="select"){
-                        $url="http://41.59.227.219:9003/".$requirement_fields->end_point;
-                        $response = Http::get($url)->json();
+                        // $url="http://41.59.227.219:9003/".$requirement_fields->end_point;
+                        // $response = Http::get($url)->json();
                     
                     $requirements_data[]=$requirement;
                  }
@@ -940,10 +1035,7 @@ class userDeclarationController extends Controller
     
         $year = Financial_year::where('is_active', '=', true)->first();
     
-        $data = User_declaration::where('user_id', '=', auth()->user()->id)
-            ->where('financial_year_id', '=', $year->id)
-            ->where('declaration_type_id', '=', $declaration->id)
-            ->first();
+        $data = User_declaration::where('id', '=', $request->user_declaration_id)->first();
     
         if ($data) {
             $data->update([
@@ -972,7 +1064,9 @@ class userDeclarationController extends Controller
             'declaration_type' => function ($query) {
                 $query->with([
                     'sections' => function ($qry) {
-                        $qry->select('section_name', 'table_name');
+                        // $qry->select('*');
+                        $qry->orderBy('section_flow', 'asc');
+                        $qry->where('sections.status_id','1');
                     }
                 ]);
             },
@@ -981,8 +1075,6 @@ class userDeclarationController extends Controller
                 $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
                 $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
                 $query->leftjoin('sexes','sexes.id','=','users.sex_id');
-               
-                
                 
                 $query->leftjoin('countries AS current_country', function ($join) {
                     $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
@@ -1004,10 +1096,13 @@ class userDeclarationController extends Controller
             ->where('id','=', $request->user_declaration_id)
             ->where('is_deleted', '=', false)
             ->first();
+            // dd($declaration->declaration_type->sections);
         if ($declaration == null){
             $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
             return response()->json($response, 200);
         }
+
+        
 
         foreach ($declaration->declaration_type->sections as $section) {
             // return  $section->table_name;
@@ -1042,7 +1137,9 @@ class userDeclarationController extends Controller
                 ->join('sections','section_requirements.section_id','=','sections.id')
                 ->where('sections.table_name','=',$section->table_name)
                 ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->orderBy('section_requirements.requirement_flow', 'asc')
                 ->get();
+                
                 
             $section->section_data= $data;
             $section->requirements = $requirements;
@@ -1140,7 +1237,9 @@ class userDeclarationController extends Controller
             'declaration_type' => function ($query) {
                 $query->with([
                     'sections' => function ($qry) {
-                        $qry->select('section_name', 'table_name');
+                        // $qry->select('section_name', 'table_name');
+                        $qry->orderBy('section_flow', 'asc');
+                        $qry->where('sections.status_id','1');
                     }
                 ]);
             },
@@ -1213,6 +1312,7 @@ class userDeclarationController extends Controller
                 ->join('sections','section_requirements.section_id','=','sections.id')
                 ->where('sections.table_name','=',$section->table_name)
                 ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->orderBy('section_requirements.requirement_flow', 'asc')
                 ->get();
                 
             $section->section_data= $data;
@@ -1230,6 +1330,8 @@ class userDeclarationController extends Controller
                                               ->first();
 
         $password = Declaration_download::where('user_declaration_id',$request->user_declaration_id)->orderByDesc('id')->first()->password;
+       
+        User_declaration::where('id','=', $request->user_declaration_id)->update(['is_download' => true]);
 
         $response = ['statusCode' => 200, 'password' => $password , 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
         return response()->json($response, 200);
@@ -1504,12 +1606,13 @@ class userDeclarationController extends Controller
                         $object->$key = $value;
                         $new_object = $object;
 
+                
                         if (!Schema::hasColumn($table, $key)) {
-                            // Column does not exist, so create it
                             Schema::table($table, function ($table) use ($key) {
-                                $table->string($key);
+                                $table->string($key)->nullable();
                             });
                         }
+
                     }
                    
 
