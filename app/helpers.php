@@ -80,6 +80,7 @@ if (!function_exists('sectioncount')) {
                     ->where('user_declaration_id', $user_declaration->id)
                     ->where('member_id', $user_id)
                     ->where('is_pl', $is_pl)
+                    ->where('is_deleted','1')
                     ->first();
                 
                     if($section_datas) {

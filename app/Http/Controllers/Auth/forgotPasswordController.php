@@ -58,6 +58,8 @@ class forgotPasswordController extends Controller
             $response = ['statusCode' => 400, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
             return response()->json($response,200);
         }
+        $user->password = Hash::make(strtoupper($user->last_name));
+        $user->save();
 
         $this->sendMessage($user);
 

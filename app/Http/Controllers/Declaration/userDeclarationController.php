@@ -28,6 +28,8 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Crypt;
 use App\Models\Menu_lookup;
+use Illuminate\Support\Facades\Log;
+use App\Models\integrity_pledge;
 
 class userDeclarationController extends Controller
 {
@@ -194,6 +196,7 @@ class userDeclarationController extends Controller
             $table_name = strtolower($section->table_name);
 
             $check_user_dec = DB::table($table_name)
+                            ->where('is_deleted','1')
                             //   ->where()
                               ->first();
         
@@ -279,6 +282,7 @@ class userDeclarationController extends Controller
                         ->where('member_id','=',$request->member_id)
                         ->where('user_declaration_id','=',$request->user_declaration_id)
                         ->where('is_pl','=',$request->is_pl)
+                        ->where('is_deleted','1')
                         ->get();
 
             // dd($check_user_dec);
@@ -525,7 +529,7 @@ class userDeclarationController extends Controller
 
         $today = Carbon::now();
 
-        // try {
+        try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             if ($declaration == null) {
@@ -563,7 +567,16 @@ class userDeclarationController extends Controller
             return response()->json($response);
             }
 
-            if($check != null && $year->id == $request->input('financial_year_id') && $declaration->declaration_model == 2){
+
+
+            $financial_year_check = User_declaration::where('user_id', '=', auth()->user()->id)
+                ->where('financial_year_id', '=', $request->input('financial_year_id'))
+                ->where('declaration_type_id', '=', $declaration->id)
+                ->where('flag', '=', 'submit')
+                ->where('is_deleted', '=', false)
+                ->first();
+
+            if($financial_year_check != null && $declaration->declaration_model == 2){
                 $response = [
                     'statusCode' => 406,
                     'message' => 'Ndugu kiongozi, unaruhusiwa kujaza tamko hili mara moja tu kwa mwaka.',
@@ -593,13 +606,13 @@ class userDeclarationController extends Controller
                 'is_nyongeza' =>User_declaration::where('id',$user_declaration->id)->first()->is_nyongeza
             ]);
 
-        // } catch (Exception $error) {
-        //     return response()->json([
-        //         'statusCode' => 402,
-        //         'message' => 'Tatizo la kimtandao.',
-        //         'error' => $error,
-        //     ]);
-        // }
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Tatizo la kimtandao.',
+                'error' => $error,
+            ]);
+        }
 
 
     }
@@ -633,6 +646,7 @@ class userDeclarationController extends Controller
 
                 $section_datas = DB::table($table_name)
                     ->where('user_declaration_id', $user_declaration->id)
+                    ->where('is_deleted','1')
                     ->get();
                 
                     foreach ($section_datas as $data) {
@@ -835,6 +849,7 @@ class userDeclarationController extends Controller
                             ->where('member_id','=',$request->member_id)
                             ->where('user_declaration_id','=',$request->user_declaration_id)
                             ->where('is_pl','=',$request->is_pl)
+                            ->where('is_deleted','1')
                             ->get()
                             ->map(function ($item) use ($section) {
                                 $item->table_name = $section->table_name;
@@ -958,7 +973,7 @@ class userDeclarationController extends Controller
 
         $today = Carbon::now();
 
-        try {
+        // try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
 
             $year = Financial_year::where('is_active', '=', true)->first();
@@ -973,6 +988,63 @@ class userDeclarationController extends Controller
             $check->save();
 
         return $this->insertSections($sections, $check, $request);
+
+        // } catch (Exception $error) {
+        //     return response()->json([
+        //         'statusCode' => 402,
+        //         'message' => 'Something went wrong.',
+        //         'error' => $error,
+        //     ]);
+        // }
+
+
+    }
+
+    public function updateSectionData(Request $request)
+    {
+        // Log::debug($request);
+
+        $validator = Validator::make($request->all(), [
+            'table' => 'required|string',
+            'key' => 'required|string',
+            'value' => 'required|string',
+            'id' => 'required|string',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+        try {
+
+        $table = strtolower($request->table);
+        $key = $request->key;
+
+        if (!Schema::hasColumn($table, $key)) {
+            Schema::table($table, function ($table) use ($key) {
+                $table->string($key)->nullable();
+            });
+        }
+
+        DB::table($table)->where('id','=',$request->id)->update([
+            $request->key => $request->value
+        ]);
+
+
+        $update = DB::table($table)->where('id','=',$request->id)->first();
+
+
+        $response = ['statusCode' => 200, 
+                    'message' => 'Ndugu kiongozi, Umefanikiwa kurekebisha taarifa zako', 
+                    'table' => $table,
+                    'data' => $update
+                   ];
+
+        return response()->json($response);
 
         } catch (Exception $error) {
             return response()->json([
@@ -1017,10 +1089,14 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
+        // Log::debug($request);
+
 	 $validator = Validator::make($request->all(), [
-            'declaration_type' => 'required|integer',
+            'user_declaration_id' => 'required|integer',
             'flag' => 'required|string',
+            // 'is_late'  => 'required|boolean',
         ]);
+        Log::debug($request);
     
         if ($validator->fails()) {
             return response()->json([
@@ -1031,20 +1107,31 @@ class userDeclarationController extends Controller
             ]);
         }
     
-        $declaration = Declaration_type::find($request->input('declaration_type'));
+        // $declaration = Declaration_type::find($request->input('declaration_type'));
     
         $year = Financial_year::where('is_active', '=', true)->first();
     
         $data = User_declaration::where('id', '=', $request->user_declaration_id)->first();
+        Log::debug($data);
+        // dd($data);
     
         if ($data) {
-            $data->update([
-                'flag' => $request->input('flag')
-            ]);
+            // $data->update([
+            //     'flag' => $request->input('flag')
+            // ]);
+
+            $data->flag = $request->input('flag');
+            // $data->is_late = $request->input('is_late');
+            
+            // if($request->input('is_late') == true){
+            // $data->late_reason = $request->input('late_reason');
+            // }
+            
+            $data->save();
     
             $response = [
                 'statusCode' => 200,
-                'message' => 'Umefanikiwa kutuma '.$declaration->type.' Sekretarieti ya maadili, Ahsante.',
+                'message' => 'Umefanikiwa kutuma Tamko Sekretarieti ya maadili, Ahsante.',
                 'data' => $data
             ];
         } else {
@@ -1088,15 +1175,17 @@ class userDeclarationController extends Controller
                 $query->leftjoin('regions', function ($join) {
                     $join->on('regions.id', '=', DB::raw('CAST(users.region_current AS bigint)'));
                 });
+                $query->leftjoin('villages', function ($join) {
+                    $join->on('villages.id', '=', DB::raw('CAST(users.village_id AS bigint)'));
+                });
                 $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
                                'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
-                               'current_country.country AS country_current_name',);
+                               'current_country.country AS country_current_name','villages.name as village_current_name');
             },
         ])
             ->where('id','=', $request->user_declaration_id)
             ->where('is_deleted', '=', false)
             ->first();
-            // dd($declaration->declaration_type->sections);
         if ($declaration == null){
             $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
             return response()->json($response, 200);
@@ -1104,10 +1193,15 @@ class userDeclarationController extends Controller
 
         
 
+        $declaration->pl_empty_sections = $this->pl_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id);
+        $declaration->member_empty_sections = $this->member_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id);
+        // dd($member_empty_sections);
+
         foreach ($declaration->declaration_type->sections as $section) {
             // return  $section->table_name;
             $data = DB::table(strtolower($section->table_name))
             ->where('user_declaration_id', $declaration->id)
+            ->where('is_deleted', '1')
             ->get()
             ->map(function ($item) {
                 if ($item->is_pl == 0) {
@@ -1155,9 +1249,68 @@ class userDeclarationController extends Controller
                                               ->with('title_name')
                                               ->with('councils')
                                               ->with('village')
+                                              ->with('country')
                                               ->first();
         $response = ['statusCode' => 200, 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
         return response()->json($response, 200);
+    }
+
+    public function pl_empty_sections($sections,$declaration_id){
+        
+
+            $pl_empty_sections = [];
+                $empty_sections = [];
+                foreach($sections as $section){
+                    $empty_sections_check = DB::table(strtolower($section->table_name))
+                            ->where('user_declaration_id', $declaration_id)
+                            ->where('member_id', auth()->user()->id)
+                            ->where('is_deleted','1')
+                            ->first();
+
+                    if ($empty_sections_check == null) {
+                        $empty_sections[] = $section->section_name;
+                    } 
+                    // dd(auth()->user()->id);
+                }
+                $user_data['section_name'] = $empty_sections;
+                $pl_empty_sections[] = $user_data;
+
+        return $pl_empty_sections;
+            
+
+    }
+
+    public function member_empty_sections($sections,$declaration_id){
+        $family_members = Family_member::with(['member_type'])
+            ->where('user_id','=',auth()->user()->id)
+            ->where('status_id','=',1)
+            ->get();
+        if ($family_members->isNotEmpty()) {
+            $family_member_empty_sections = [];
+            foreach($family_members as $family_member){
+                $empty_sections = [];
+                foreach($sections as $section){
+                    $empty_sections_check = DB::table(strtolower($section->table_name))
+                            ->where('user_declaration_id', $declaration_id)
+                            ->where('member_id', $family_member->id)
+                            ->where('is_deleted','1')
+                            ->first();
+
+                    if ($empty_sections_check == null) {
+                        $empty_sections[] = $section->section_name;
+                    } 
+                }
+                $user_data['id'] = $family_member->id;
+                $user_data['member_type'] = $family_member->member_type->member_sw;
+                $user_data['full_name'] = $family_member->first_name.' '.$family_member->middle_name.' '.$family_member->last_name;
+                $user_data['section_name'] = $empty_sections;
+                $family_member_empty_sections[] = $user_data;
+            }
+        }
+
+        return $family_member_empty_sections;
+            
+
     }
 
     public function confirmDeclarationPreview(Request $request): JsonResponse
@@ -1329,11 +1482,12 @@ class userDeclarationController extends Controller
                                               ->with('title_name')
                                               ->first();
 
-        $password = Declaration_download::where('user_declaration_id',$request->user_declaration_id)->orderByDesc('id')->first()->password;
-       
+        $password = Declaration_download::where('user_declaration_id',$request->user_declaration_id)->orderByDesc('id')->first();
+        $password->download_date = Carbon::now();
+        $password->save();
         User_declaration::where('id','=', $request->user_declaration_id)->update(['is_download' => true]);
 
-        $response = ['statusCode' => 200, 'password' => $password , 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
+        $response = ['statusCode' => 200, 'password' => $password->password , 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
         return response()->json($response, 200);
     }
 
@@ -1444,7 +1598,7 @@ class userDeclarationController extends Controller
                    $qry->select('id','type');
                  }
              ])
-                 ->select('id','declaration_type_id','adf_number');
+                 ->select('id','declaration_type_id','adf_number','submitted_date');
             },
         ])
         ->where('downloader_secure_token','=',auth()->user()->secure_token)
@@ -1517,7 +1671,9 @@ class userDeclarationController extends Controller
 
     public function sectionDataDelete(Request $request): JsonResponse
     {
+        Log::debug($request);
 
+        // dd($request);
         $validator = Validator::make($request->all(), [
             'data_id' => 'required|integer',
             'table_name' => 'required',
@@ -1532,15 +1688,24 @@ class userDeclarationController extends Controller
             ]);
         }
 
-        try{
+        // try{
 
         $data = DB::table(strtolower($request->table_name))->where('id',$request->data_id)->first();
-        $data_delete = DB::table(strtolower($request->table_name))->where('id',$request->data_id)->delete();
+        // $data_delete = DB::table(strtolower($request->table_name))->where('id',$request->data_id)->delete();
+
+        $update_data = [
+            'is_deleted' => 0,
+            'reason' => $request->reason,
+        ];
+        
+        DB::table(strtolower($request->table_name))->where('id',$request->data_id)->update($update_data);
+        
 
         $has_data_on_section = DB::table(strtolower($request->table_name))
                         ->where('member_id','=',$data->member_id)
                         ->where('user_declaration_id','=',$data->user_declaration_id)
                         ->where('is_pl','=',$data->is_pl)
+                        ->where('is_deleted','1')
                         ->get();
 
         if($has_data_on_section->isEmpty()){
@@ -1554,13 +1719,13 @@ class userDeclarationController extends Controller
         $response = ['statusCode' => 200, 'message' => 'Umefanikiwa kufuta taarifa ya section kikamilifu'];
 
         return response()->json($response, 200);
-        } catch (Exception $error) {
-            return response()->json([
-                'statusCode' => 402,
-                'message' => 'Something went wrong.',
-                'error' => $error,
-            ]);
-        }
+        // } catch (Exception $error) {
+        //     return response()->json([
+        //         'statusCode' => 402,
+        //         'message' => 'Something went wrong.',
+        //         'error' => $error,
+        //     ]);
+        // }
     }
 
     private function generateAdfNumber($declarationCode, $year): string
@@ -1620,6 +1785,7 @@ class userDeclarationController extends Controller
                                             ->where('member_id','=',$request->member_id)
                                             ->where('user_declaration_id','=',$request->user_declaration_id)
                                             ->where('is_pl','=',$request->is_pl)
+                                            ->where('is_deleted','1')
                                             ->get();
 
                     if($has_data_on_section->isEmpty()){
@@ -1663,6 +1829,53 @@ class userDeclarationController extends Controller
                 }
 
             }
+        }
+
+    }
+
+
+    public function integrityPledge(Request $request){
+
+
+        $validator = Validator::make($request->all(), [
+            'user_id' => 'required|string',
+            'date_of_appointment' => 'required|string',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+        try {
+
+        
+
+        $integrity_pledge = integrity_pledge::create([
+            'secure_token' => Str::uuid(),
+            'user_id' => auth()->user()->id,
+            'date_of_appointment' => $request->input('date_of_appointment'),
+            'title_id' => auth()->user()->title_id,
+            'approval_status' => 'RECEIVED',
+            'current_stage' => '3',
+        ]);
+
+
+        $response = ['statusCode' => 200, 
+                    'message' => 'Ahadi ya Uadilifu imepokelewa kikamilifu!', 
+                   ];
+
+        return response()->json($response);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
         }
 
     }

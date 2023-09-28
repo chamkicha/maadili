@@ -19,29 +19,29 @@ class familyMemberController extends Controller
     public function addFamilyMember(Request $request): JsonResponse
     {
 
-        $validator = Validator::make($request->all(), [
-            'family_member_type' => 'required|integer',
-            'sex' => 'required|integer',
-            'first_name' => 'required|string',
-            'middle_name' => 'required|string',
-            'last_name' => 'required|string',
-            'date_of_birth' => 'required|string',
-            'occupation' => 'nullable',
-		    'nida'=>'nullable',
-		    'tin_number'=>'nullable'
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'family_member_type' => 'required|integer',
+        //     'sex' => 'required|integer',
+        //     'first_name' => 'required|string',
+        //     'middle_name' => 'required|string',
+        //     'last_name' => 'required|string',
+        //     'date_of_birth' => 'required|string',
+        //     'occupation' => 'nullable',
+		//     'nida'=>'nullable',
+		//     'tin_number'=>'nullable'
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors());
+        // }
 
       // $id = $request->input('id');
 
         $member = Family_member::updateOrCreate([
             'secure_token' => Str::uuid(),
             'user_id' => auth()->user()->id,
-            'family_member_type_id' => $request->input('family_member_type'),
-            'sex_id' => $request->input('sex'),
+            'family_member_type_id' => $request->input('family_member_type_id'),
+            'sex_id' => $request->input('sex_id'),
             'first_name' => $request->input('first_name'),
             'middle_name' => $request->input('middle_name'),
             'last_name' => $request->input('last_name'),
@@ -53,6 +53,7 @@ class familyMemberController extends Controller
             'taasisi_id' => $request->input('taasisi_id'),
             'taasisi_other' => $request->input('taasisi_other'),
             'tarehe_ya_kuajiriwa' => $request->input('tarehe_ya_kuajiriwa'),
+
             
 
         ]);
@@ -102,50 +103,37 @@ class familyMemberController extends Controller
         return response()->json($response);
     }
 
-    public function editFamilyMember($token): JsonResponse
+    public function editFamilyMember($id): JsonResponse
     {
 
-        $member = Family_member::where('secure_token','=',$token)->first();
+        $member = Family_member::where('id','=',$id)->first();
 
         $response =  ['statusCode' => 200, 'member' => $member ];
         return response()->json($response);
     }
 
-    public function updateFamilyMember(Request $request, $token): JsonResponse
+    public function updateFamilyMember(Request $request, $id): JsonResponse
     {
+        // Log::debug($request);
 
-        $validator = Validator::make($request->all(), [
-            'family_member_type' => 'required|integer',
-            'sex' => 'required|integer',
-            'first_name' => 'required|string',
-            'middle_name' => 'required|string',
-            'last_name' => 'required|string',
-            'date_of_birth' => 'required|string',
-		    'occupation' => 'nullable',
-		    'nida'=>'nullable',
-            'tin_number'=>'nullable'
 
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
-
-        $member = Family_member::where('secure_token','=',$token)->first();
-        $member->family_member_type_id = $request->input('family_member_type');
-        $member->sex_id = $request->input('sex');
-        $member->first_name = $request->input('first_name');
-        $member->middle_name = $request->input('middle_name');
-        $member->last_name = $request->input('last_name');
-        $member->date_of_birth = $request->input('date_of_birth');
-        $member->occupation = $request->input('occupation');
-	    $member->nida = $request->input('nida');
-        $member->tin_number = $request->input('tin_number');
-        $member->phone_no = $request->input('phone_no');
-        $member->taasisi_id = $request->input('taasisi_id');
-        $member->taasisi_other = $request->input('taasisi_other');
-        $member->tarehe_ya_kuajiriwa = $request->input('tarehe_ya_kuajiriwa');
-        $member->save();
+        $member = Family_member::where('id', $id)
+                    ->update([
+                        'user_id' => auth()->user()->id,
+                        'family_member_type_id' => $request->input('family_member_type_id'),
+                        'sex_id' => $request->input('sex_id'),
+                        'first_name' => $request->input('first_name'),
+                        'middle_name' => $request->input('middle_name'),
+                        'last_name' => $request->input('last_name'),
+                        'date_of_birth' => $request->input('date_of_birth'),
+                        'occupation' => $request->input('occupation'),
+                        'nida' => $request->input('nida'),
+                        'tin_number' => $request->input('tin_number'),
+                        'phone_no' => $request->input('phone_no'),
+                        'taasisi_id' => $request->input('taasisi_id'),
+                        'taasisi_other' => $request->input('taasisi_other'),
+                        'tarehe_ya_kuajiriwa' => $request->input('tarehe_ya_kuajiriwa'),
+                    ]);
 
         $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kufanya mabadiliko ya mwanafamilia/mtegemezi wako kwenye dirisha lako'];
         return response()->json($response);

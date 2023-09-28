@@ -29,10 +29,43 @@ use App\Models\Council;
 use App\Models\Village;
 use App\Models\Menu_lookup;
 use App\Models\User;
+use DB;
+use Illuminate\Support\Facades\Validator;
 
 
 class lookUpDataController extends Controller
 {
+
+    public function freeze_data(Request $request){
+
+        $validator = Validator::make($request->all(), [
+            'section_id' => 'required|integer',
+            'freeze_type_id' => 'required|string',
+        ]);
+    
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+
+        $freeze_datas = DB::table('section_requirements')
+                        ->join('requirements','requirements.id','=','section_requirements.requirement_id')
+                        ->where('section_requirements.section_id', '=', $request->section_id)
+                        ->where('section_requirements.freeze_type', '=', '0')
+                        ->where('section_requirements.freeze_type_id', '=', $request->freeze_type_id)
+                        ->get();
+
+
+        $response = ['freeze_datas' => $freeze_datas];
+
+        return response()->json($response,200);
+
+    }
 
     public function financial_year(){
         $Financial_year = Financial_year::where('is_active', '=', true)->get();

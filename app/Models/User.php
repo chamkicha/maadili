@@ -71,7 +71,8 @@ class User extends Authenticatable
         'physical_address_current',
         'kijiji_mtaa_shehia',
         'kijiji_mtaa_shehia_current',
-        'village_id'
+        'village_id',
+        'village_string'
 	   
     ];
 

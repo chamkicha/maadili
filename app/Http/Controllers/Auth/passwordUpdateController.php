@@ -32,7 +32,7 @@ class passwordUpdateController extends Controller
 
             $response = [
                 'statusCode' => 200,
-                'message' => 'Congratulations,Your password is successful changed'
+                'message' => 'Hongera, umefanikiwa kubadili Nywila'
             ];
             return response()->json($response, 200);
 
@@ -60,7 +60,7 @@ class passwordUpdateController extends Controller
 
             $response = [
                 'statusCode' => 200,
-                'message' => 'Congratulations,Your password is successful changed'
+                'message' => 'Hongera, umefanikiwa kubadili Nywila'
             ];
             return response()->json($response, 200);
         }

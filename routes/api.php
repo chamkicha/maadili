@@ -62,14 +62,16 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('declaration/section-data-delete', 'sectionDataDelete');
         Route::post('declaration/getSectionsList', 'getSectionsList');
         Route::get('declaration/ADFSubmittedList', 'ADFSubmittedList');
+        Route::post('declaration/updateSectionData', 'updateSectionData');
+        Route::post('declaration/apply-integrity-pledge', 'integrityPledge');
         
     });
 
     Route::controller(familyMemberController::class)->group(function (){
         Route::post('register/family-member', 'addFamilyMember');
         Route::get('family-members', 'getFamilyMembers');
-        Route::get('edit/family-member/{token?}', 'editFamilyMember');
-        Route::post('update/family-member/{token?}', 'updateFamilyMember');
+        Route::get('edit/family-member/{id?}', 'editFamilyMember');
+        Route::post('update/family-member/{id?}', 'updateFamilyMember');
 	Route::delete('delete/family-member/{token?}', 'deleteFamilyMember');
     });
 
@@ -101,7 +103,8 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('family-member-type', 'familyMemberType');
     Route::get('menuLookup', 'menuLookup');
     Route::get('leadersList', 'leadersList');
-    });
+    Route::post('freeze_data', 'freeze_data');
+});
 
 });
 

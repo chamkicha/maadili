@@ -70,6 +70,7 @@ class BinafsiController extends Controller
         $kiongozi ->country_current = $request->input('country_current');
         $kiongozi ->kijiji_mtaa_shehia = $request->input('kijiji_mtaa_shehia');
         $kiongozi ->kijiji_mtaa_shehia_current = $request->input('kijiji_mtaa_shehia_current');
+        $kiongozi ->village_string = $request->input('village_string');
         $kiongozi->save();
         $createMenuLookup = createMenuLookup('stage_one');
 
