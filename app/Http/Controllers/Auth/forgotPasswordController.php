@@ -59,6 +59,7 @@ class forgotPasswordController extends Controller
             return response()->json($response,200);
         }
         $user->password = Hash::make(strtoupper($user->last_name));
+        $user->is_password_forget = true;
         $user->save();
 
         $this->sendMessage($user);
@@ -105,7 +106,7 @@ class forgotPasswordController extends Controller
 
     private function sendMessage($user) {
 
-        $message = "Ndugu kiongozi. ".$user->first_name.' '.$user->middle_name.' '.$user->last_name ." Pokea taarifa za kukuwezesha kuingia kwenye mfumo wa ODS unaopatikana kupitia anuani https://ods.maadili.go.tz au tovuti ya www.maadili.go.tz , Username: ".$user->nida.", Password: ".strtoupper($user->last_name).". Taarifa hizi ni za siri kwa ajili yako.";
+        $message = "Ndugu kiongozi, ".$user->first_name.' '.$user->middle_name.' '.$user->last_name ." umefanikiwa kubadili nywila. Tafadhali tumia nywila: ".strtoupper($user->last_name)." kuingia kwenye mfumo.Taarifa hizi ni za siri.";
         $response = Http::asForm()->post('http://41.59.227.219:9003/emis/send-sms', [
             'message' => $message,
             'phoneNumber' => $user->phone_number,

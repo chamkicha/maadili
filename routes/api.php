@@ -104,11 +104,6 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('menuLookup', 'menuLookup');
     Route::get('leadersList', 'leadersList');
     Route::post('freeze_data', 'freeze_data');
-});
-
-});
-
-Route::controller(lookUpDataController::class)->group(function () {
     Route::get('countries', 'country');
     Route::get('regions', 'regions');
     Route::get('districts/{regionId?}', 'districts');
@@ -131,6 +126,32 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::get('councils/{district_id?}', 'councils');
     Route::get('villages/{ward_id?}', 'villages');
 });
+
+});
+
+// Route::controller(lookUpDataController::class)->group(function () {
+//     Route::get('countries', 'country');
+//     Route::get('regions', 'regions');
+//     Route::get('districts/{regionId?}', 'districts');
+//     Route::get('wards/{LgaCode?}', 'wards');
+//     Route::get('sex', 'sex');
+//     Route::get('marital-statuses', 'maritalStatus');
+//     Route::get('building-type', 'buildingType');
+//     Route::get('titles', 'titles');
+//     Route::get('offices', 'offices');
+//     Route::get('employment-type', 'employmentType');
+//     Route::get('declaration-type', 'declarationType');
+//     Route::get('type-of-use', 'typeOfUse');
+//     Route::get('source-of-income', 'sourceOfIncome');
+//     Route::get('property-type', 'propertyType');
+//     Route::get('transport-types', 'transportTypes');
+//     Route::get('debt-types', 'debtTypes');
+//     Route::get('uuid', 'uuid');
+//     Route::get('hadhi', 'hadhi');
+//     Route::get('financial_year', 'financial_year');
+//     Route::get('councils/{district_id?}', 'councils');
+//     Route::get('villages/{ward_id?}', 'villages');
+// });
 
 Route::controller(notificationController::class)->group(function () {
     Route::get('notifications', 'showNotifications');

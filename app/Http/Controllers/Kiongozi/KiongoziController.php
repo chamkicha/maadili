@@ -30,7 +30,6 @@ class KiongoziController extends Controller
 
         $validator = Validator::make($request->all(), [
             'date_employment' => 'required|string',
-            'salary' => 'required|string',
             'posh' => 'required|string',
             'other_revenue' => 'required|string',
             'last_title' => 'required|string',
@@ -98,7 +97,6 @@ return response()->json($response);
     {
         $validator = Validator::make($request->all(),[
             'date_employment' => 'required|string',
-            'salary' => 'required|string',
             'posh' => 'required|string',
             'other_revenue' => 'required|string',
             'last_title' => 'required|string',

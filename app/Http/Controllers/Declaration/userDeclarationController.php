@@ -30,6 +30,7 @@ use Illuminate\Support\Facades\Crypt;
 use App\Models\Menu_lookup;
 use Illuminate\Support\Facades\Log;
 use App\Models\integrity_pledge;
+use Illuminate\Support\Facades\File;
 
 class userDeclarationController extends Controller
 {
@@ -486,7 +487,7 @@ class userDeclarationController extends Controller
     
                 return response()->json([
                     'statusCode' => 501,
-                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za wategemezi ili uweze kuendelea.',
+                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za Mwenza ili uweze kuendelea.',
                     'error' => false,
                 ]);
                }
@@ -1094,9 +1095,8 @@ class userDeclarationController extends Controller
 	 $validator = Validator::make($request->all(), [
             'user_declaration_id' => 'required|integer',
             'flag' => 'required|string',
-            // 'is_late'  => 'required|boolean',
+            'is_late'  => 'required',
         ]);
-        Log::debug($request);
     
         if ($validator->fails()) {
             return response()->json([
@@ -1112,7 +1112,6 @@ class userDeclarationController extends Controller
         $year = Financial_year::where('is_active', '=', true)->first();
     
         $data = User_declaration::where('id', '=', $request->user_declaration_id)->first();
-        Log::debug($data);
         // dd($data);
     
         if ($data) {
@@ -1121,11 +1120,17 @@ class userDeclarationController extends Controller
             // ]);
 
             $data->flag = $request->input('flag');
-            // $data->is_late = $request->input('is_late');
+            $data->is_late = $request->input('is_late');
             
-            // if($request->input('is_late') == true){
-            // $data->late_reason = $request->input('late_reason');
-            // }
+            if($request->input('is_late') == true){
+            $data->late_reason = $request->input('late_reason');
+            }
+            
+            if($request->input('late_reason_attachment')){
+                $add_attachment = $this->base64_to_file($request->late_reason_attachment, 'latereasons');
+                $data->late_reason_attachment = $add_attachment;
+
+            }
             
             $data->save();
     
@@ -1142,6 +1147,32 @@ class userDeclarationController extends Controller
         }
     
         return response()->json($response);
+    }
+
+    public function base64_to_file($base64_attachment,$folder){
+
+
+        $base64Image = $base64_attachment; 
+
+        $base64Image = preg_replace('#^data:image/\w+;base64,#i', '', $base64Image);
+
+        $imageData = base64_decode($base64Image);
+
+        $filename = uniqid() . '.pdf';
+
+        $folderPath = public_path('attahments/'.$folder);
+
+        if (!File::isDirectory($folderPath)) {
+            File::makeDirectory($folderPath, 0755, true, true);
+        }
+
+        $filePath = $folderPath . '/' . $filename;
+        file_put_contents($filePath, $imageData);
+
+
+        return 'attahments/'.$folder.'/'.$filename;
+        
+
     }
 
     public function previewAdf(Request $request)
@@ -1251,7 +1282,18 @@ class userDeclarationController extends Controller
                                               ->with('village')
                                               ->with('country')
                                               ->first();
-        $response = ['statusCode' => 200, 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year];
+
+        $password = Declaration_download::where('user_declaration_id',$declaration->id)->orderByDesc('id')->first();
+
+        if($password){
+
+            $password = $password->password;
+        }else{
+            $password = null;
+
+        }
+
+        $response = ['statusCode' => 200, 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year, 'password' => $password];
         return response()->json($response, 200);
     }
 
@@ -1401,9 +1443,9 @@ class userDeclarationController extends Controller
                 $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
                 $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
                 $query->leftjoin('sexes','sexes.id','=','users.sex_id');
-                $query->leftjoin('countries AS birth_country', function ($join) {
-                    $join->on('birth_country.id', '=', DB::raw('CAST(users.country_birth AS bigint)'));
-                });
+                // $query->leftjoin('countries AS birth_country', function ($join) {
+                //     $join->on('birth_country.id', '=', DB::raw('CAST(users.country_birth AS bigint)'));
+                // });
                 
                 $query->leftjoin('countries AS current_country', function ($join) {
                     $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
@@ -1419,7 +1461,7 @@ class userDeclarationController extends Controller
                 });
                 $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
                                'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
-                               'birth_country.country AS country_birth_name','current_country.country AS country_current_name',);
+                               'current_country.country AS country_current_name',);
             },
         ])
             ->where('id','=', $request->user_declaration_id)

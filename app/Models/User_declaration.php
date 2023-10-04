@@ -19,7 +19,8 @@ class User_declaration extends Model
         'adf_number',
         'financial_year_id',
         'flag',
-        'is_confirmed'
+        'is_confirmed',
+        'late_reason_attachment'
     ];
   
     public function declaration_type(): BelongsTo

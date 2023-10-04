@@ -72,10 +72,10 @@ class AuthenticationController extends Controller
                 ->orWhere('phone_number', $request->username)
                 ->firstOrFail();
 
-//        if ($user->verified_at == null){
-//
-//            return response()->json(['statusCode' => 401, 'message' => 'Samahani hakiki barua pepe yako ili uweze kuendelea'], 401);
-//        }
+            //        if ($user->verified_at == null){
+            //
+            //            return response()->json(['statusCode' => 401, 'message' => 'Samahani hakiki barua pepe yako ili uweze kuendelea'], 401);
+            //        }
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
