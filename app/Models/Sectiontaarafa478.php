@@ -11,7 +11,7 @@ class Sectiontaarafa478 extends Model
   protected $table='section_taarafa_478';
 
     protected $fillable = [
-	'id',
+	    'id',
         'user_id',
         'title_id',
         'date_employment',

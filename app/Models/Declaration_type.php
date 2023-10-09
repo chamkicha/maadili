@@ -21,4 +21,6 @@ class Declaration_type extends Model
 
 
 
+
+
 }

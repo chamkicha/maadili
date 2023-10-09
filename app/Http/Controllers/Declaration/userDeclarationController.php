@@ -238,6 +238,7 @@ class userDeclarationController extends Controller
 
     public function getSectionsList(Request $request): JsonResponse
     {
+
         $validator = Validator::make($request->all(), [
             'declaration_type_secure_token' =>  ['required','string'],
             'member_id' =>  ['required','integer'],
@@ -258,9 +259,12 @@ class userDeclarationController extends Controller
 
         $year = Financial_year::where('is_active', '=', true)->first();
 
+
          $declaration = Declaration_type::with([
              'sections' => function ($query) {
-            $query->orderBy('declaration_sections.section_flow', 'ASC')->where('status_id',1);
+            $query->orderBy('declaration_sections.section_flow', 'ASC')
+                    ->where('status_id',1)
+                    ->with(['declarationSections']);
         }
         ])
             ->where('secure_token', '=', $request->declaration_type_secure_token)
@@ -483,13 +487,16 @@ class userDeclarationController extends Controller
     
             if($menu_lookup->stage_two === false){
                 $user = User::where('id',auth()->user()->id)->first();
-                if ($user !== null && ($user->maritial_status_id === 2 || $user->maritial_status_id === 3)) {
+                if ($user) {
     
-                return response()->json([
-                    'statusCode' => 501,
-                    'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za Mwenza ili uweze kuendelea.',
-                    'error' => false,
-                ]);
+                    if($user->marital_status_id === null || $user->marital_status_id === 2 || $user->marital_status_id === 3){
+
+                        return response()->json([
+                            'statusCode' => 501,
+                            'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa za Mwenza ili uweze kuendelea.',
+                            'error' => false,
+                        ]);
+                    }
                }
             }
     
@@ -637,6 +644,7 @@ class userDeclarationController extends Controller
                                             ->join('sections','sections.id','=','declaration_sections.section_id')
                                             ->where('declaration_types.id',$declaration_type_id)
                                             ->get();
+                                            // dd($sections);
 
             foreach ($sections as $section) {
 
@@ -1348,6 +1356,8 @@ class userDeclarationController extends Controller
                 $user_data['section_name'] = $empty_sections;
                 $family_member_empty_sections[] = $user_data;
             }
+        }else{
+            $family_member_empty_sections = [];
         }
 
         return $family_member_empty_sections;
@@ -1713,7 +1723,7 @@ class userDeclarationController extends Controller
 
     public function sectionDataDelete(Request $request): JsonResponse
     {
-        Log::debug($request);
+        // Log::debug($request);
 
         // dd($request);
         $validator = Validator::make($request->all(), [

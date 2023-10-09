@@ -273,8 +273,20 @@ class lookUpDataController extends Controller
         if($sex){
             if($sex->sex_id == '1'){
                 $member_sw = 'Mume';
+
+                if($sex->marital_status_id == '4'){
+                    $removeNimeoa = 'Mke';
+                }else{
+                    $removeNimeoa = '';
+                }
             }elseif($sex->sex_id == '2'){
                 $member_sw = 'Mke';
+
+                if($sex->marital_status_id == '5'){
+                    $removeNimeoa = 'Mume';
+                }else{
+                    $removeNimeoa = '';
+                }
 
             }
         }else{
@@ -282,7 +294,7 @@ class lookUpDataController extends Controller
 
         }
         // $member_types = Family_member_type::get();
-        $member_types = Family_member_type::whereNotIn('member_sw', [$member_sw])->get();
+        $member_types = Family_member_type::whereNotIn('member_sw', [$member_sw,$removeNimeoa])->get();
         $response = ['member_types' => $member_types];
 
         return response()->json($response,200);

@@ -11,6 +11,9 @@ class Section_requirement extends Model
 {
     use HasFactory;
 
+
+
+
     public function requirement(): BelongsTo
     {
 

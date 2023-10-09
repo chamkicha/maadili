@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
 
 class BinafsiController extends Controller
 {
@@ -31,6 +32,7 @@ class BinafsiController extends Controller
 
     public function update(Request $request ,$id)
     {
+
         $kiongozi = User::find($id);
         $kiongozi ->first_name = $request->input('first_name');
         $kiongozi ->middle_name = $request->input('middle_name');
@@ -51,13 +53,13 @@ class BinafsiController extends Controller
         $kiongozi ->district_nida = $request->input('district_nida');
  	    $kiongozi ->title_id = $request->input('title_id');
  	    $kiongozi ->hadhi_id = $request->input('hadhi_id');
-	    $kiongozi ->marital_status_id = $request->input('marital_status_id');
         $kiongozi ->village_nida = $request->input('village_nida');
         $kiongozi ->passport = $request->input('passport');
         $kiongozi ->profile_picture = $request->input('profile_picture');
         $kiongozi ->signature_image = $request->input('signature_image');
         
         $kiongozi ->sex_id = $request->input('sex_id');
+        $kiongozi ->marital_status_id = $request->input('marital_status_id');
         $kiongozi ->check_number = $request->input('check_number');
         $kiongozi ->country_birth = $request->input('country_birth');
         $kiongozi ->country_current = $request->input('country_current');

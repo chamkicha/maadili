@@ -72,7 +72,7 @@ class User extends Authenticatable
         'kijiji_mtaa_shehia',
         'kijiji_mtaa_shehia_current',
         'village_id',
-        'village_string'
+        'village_string',
 	   
     ];
 

@@ -15,4 +15,14 @@ class Section extends Model
 
         return $this->hasMany(Section_requirement::class);
     }
+
+
+    public function declarationSections()
+    {
+
+        return $this->BelongsTo(Declaration_section::class,'id','section_id');
+    }
+
+
+    
 }

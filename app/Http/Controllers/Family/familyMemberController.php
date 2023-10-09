@@ -59,7 +59,11 @@ class familyMemberController extends Controller
         ]);
 
         $add_to_user_decralation_lookup = $this->addUserDeclaration($member);
-        $createMenuLookup = createMenuLookup('stage_two');
+        
+        if($request->family_member_type_id == 1 || $request->family_member_type_id == 2){
+            $createMenuLookup = createMenuLookup('stage_two');
+
+        }
 
         $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kumsajili mwanafamilia/mtegemezi wako kwenye dirisha lako'];
         return response()->json($response);
