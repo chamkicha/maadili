@@ -146,8 +146,18 @@ class familyMemberController extends Controller
 
     public function deleteFamilyMember($token)
     {
-             $member = Family_member::where('secure_token','=',$token)->first();
+            $member = Family_member::where('secure_token','=',$token)->first();
+
+            if($member->family_member_type_id == 1 || $member->family_member_type_id == 2){
+                $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
+                if($menu_lookup){
+                    $menu_lookup->stage_two = false;
+                    $menu_lookup->save();
+                }
+            }
+
             $member->delete();
+
             return response()->json(['statusCode' => 200, 'message'=>'Umefanikiwa kufuta mwanafamilia/mtegemezi kikamilifu!']);
         
     }
