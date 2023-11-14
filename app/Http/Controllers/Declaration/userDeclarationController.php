@@ -594,7 +594,6 @@ class userDeclarationController extends Controller
 
             }
 
-
             $user_declaration = User_declaration::create([
                 'secure_token' => Str::uuid(),
                 'user_id' => auth()->user()->id,
@@ -610,8 +609,8 @@ class userDeclarationController extends Controller
                 'statusCode' => 200,
                 'message' => 'Ndugu kiongozi endelea kuongeza au kupunguza '.$declaration->type.' , Ahsante!.',
                 'user_declaration_id' => $user_declaration->id,
-                'declaration_secure_token' =>$request->declaration_secure_token,
-                'is_nyongeza' =>User_declaration::where('id',$user_declaration->id)->first()->is_nyongeza
+                'declaration_secure_token' => $request->declaration_secure_token,
+                'is_nyongeza' => User_declaration::where('id',$user_declaration->id)->first()->is_nyongeza,
             ]);
 
         } catch (Exception $error) {
@@ -980,7 +979,7 @@ class userDeclarationController extends Controller
             ]);
         }
 
-        $today = Carbon::now();
+        // $today = Carbon::now();
 
         // try {
             $declaration = Declaration_type::find($request->input('declaration_type'));
@@ -992,7 +991,7 @@ class userDeclarationController extends Controller
             $sections = $request->input('sections');
 
             $check->has_password = false;
-            $check->submitted_date = $today;
+            // $check->submitted_date = $today;
             
             $check->save();
 
@@ -1098,7 +1097,7 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
-        // Log::debug($request);
+        Log::debug($request);
 
 	 $validator = Validator::make($request->all(), [
             'user_declaration_id' => 'required|integer',
@@ -1116,6 +1115,7 @@ class userDeclarationController extends Controller
         }
     
         // $declaration = Declaration_type::find($request->input('declaration_type'));
+        $today = Carbon::now();
     
         $year = Financial_year::where('is_active', '=', true)->first();
     
@@ -1129,6 +1129,8 @@ class userDeclarationController extends Controller
 
             $data->flag = $request->input('flag');
             $data->is_late = $request->input('is_late');
+            $data->submitted_date = $today;
+
             
             if($request->input('is_late') == true){
             $data->late_reason = $request->input('late_reason');
@@ -1335,6 +1337,7 @@ class userDeclarationController extends Controller
             ->where('user_id','=',auth()->user()->id)
             ->where('status_id','=',1)
             ->get();
+            // dd($family_members);
         if ($family_members->isNotEmpty()) {
             $family_member_empty_sections = [];
             foreach($family_members as $family_member){
@@ -1704,10 +1707,19 @@ class userDeclarationController extends Controller
                 $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
             },
         ])
-            ->where('declaration_type_id','=', $request->declaration_type)
-            ->where('user_id', '=', auth()->user()->id)
-            ->where('financial_year_id', '=', $active_year->id)
+            ->where('id','=', $request->user_declaration_id)
             ->first();
+
+        // $declaration = User_declaration::with([
+        //     'declaration_type',
+        //     'user' => function ($query) {
+        //         $query->select('id', 'file_number', 'first_name', 'middle_name', 'last_name', 'nida', 'phone_number');
+        //     },
+        // ])
+        //     ->where('declaration_type_id','=', $request->declaration_type)
+        //     ->where('user_id', '=', auth()->user()->id)
+        //     ->where('financial_year_id', '=', $active_year->id)
+        //     ->first();
 
         if ($declaration == null){
 

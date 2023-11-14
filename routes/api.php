@@ -125,6 +125,8 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('financial_year', 'financial_year');
     Route::get('councils/{district_id?}', 'councils');
     Route::get('villages/{ward_id?}', 'villages');
+    Route::get('get_selected_date', 'get_selected_date');
+    
 });
 
 });

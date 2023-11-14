@@ -31,10 +31,30 @@ use App\Models\Menu_lookup;
 use App\Models\User;
 use DB;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Sectiontaarafa478;
 
 
 class lookUpDataController extends Controller
 {
+    public function get_selected_date(){
+            $kiongozi = Sectiontaarafa478::where('user_id', auth()->user()->id)->latest('created_at')->first();
+                if($kiongozi){
+                    $selected_date = $kiongozi->selected_date;
+                    $message = 'Tarehe ya kuchaguliwa';
+                    $statusCode = '200';
+                }else{
+                    $selected_date = null;
+                    $message = 'Hakuna Taarifa Za ajila';
+                    $statusCode = '500';
+
+                }
+
+
+        $response = ['selected_date' => $selected_date, 'message' => $message, 'statusCode' =>$statusCode ];
+
+        return response()->json($response,200);
+
+    }
 
     public function freeze_data(Request $request){
 
@@ -288,9 +308,20 @@ class lookUpDataController extends Controller
                     $removeNimeoa = '';
                 }
 
+            }else{
+                return response()->json([
+                    'statusCode' => 500,
+                    'message' => 'Ndugu kiongozi tafadhali sasisha kwanza taarifa binafsi ili uweze kuendelea.',
+                    'error' => false,
+                ]);
+
             }
         }else{
-            $member_sw = 'Mume';
+            return response()->json([
+                'statusCode' => 500,
+                'message' => 'Ndugu kiongozi tafadhali sasisha kwanza taarifa binafsi ili uweze kuendelea.',
+                'error' => false,
+            ]);
 
         }
         // $member_types = Family_member_type::get();
