@@ -300,10 +300,7 @@ class userDeclarationController extends Controller
             $section->has_data = $has_data;
         }
 
-        $check = User_declaration::where('user_id', '=', auth()->user()->id)
-            ->where('financial_year_id', '=', $year->id)
-            ->where('declaration_type_id', '=', $declaration->id)
-            ->first();
+        $user_declaration = User_declaration::where('id', $request->user_declaration_id)->first();
 
         // if ($check != null) {
         //     if ($check->is_confirmed && $declaration->declaration_code == "TRM") {
@@ -326,7 +323,7 @@ class userDeclarationController extends Controller
 
         //     }
         // }
-        $response = ['statusCode' => 200,'declaration' => $declaration];
+        $response = ['statusCode' => 200,'declaration' => $declaration, 'user_declaration'=>$user_declaration];
 
         return response()->json($response, 200);
     }
