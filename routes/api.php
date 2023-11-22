@@ -126,6 +126,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('councils/{district_id?}', 'councils');
     Route::get('villages/{ward_id?}', 'villages');
     Route::get('get_selected_date', 'get_selected_date');
+    Route::get('emis/{end_point}', 'get_api');
     
 });
 

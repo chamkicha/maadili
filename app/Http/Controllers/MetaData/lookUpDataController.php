@@ -32,10 +32,30 @@ use App\Models\User;
 use DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Sectiontaarafa478;
+use Illuminate\Support\Facades\Http;
 
 
 class lookUpDataController extends Controller
 {
+    public function get_api($endpoint){
+
+        $URL  = 'http://api.maadili.go.tz:9003/emis/'.$endpoint;        
+        try{
+        $result  =  Http::get($URL);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
+
+
+    }
+
     public function get_selected_date(){
             $kiongozi = Sectiontaarafa478::where('user_id', auth()->user()->id)->latest('created_at')->first();
                 if($kiongozi){
