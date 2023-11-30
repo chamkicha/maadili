@@ -54,12 +54,12 @@ class familyMemberController extends Controller
             'taasisi_other' => $request->input('taasisi_other'),
             'tarehe_ya_kuajiriwa' => $request->input('tarehe_ya_kuajiriwa'),
 
-            
+
 
         ]);
 
         $add_to_user_decralation_lookup = $this->addUserDeclaration($member);
-        
+
         if($request->family_member_type_id == 1 || $request->family_member_type_id == 2){
             $createMenuLookup = createMenuLookup('stage_two');
 
@@ -75,7 +75,7 @@ class familyMemberController extends Controller
         $User_declarations = User_declaration::where('user_id', '=', auth()->user()->id)
                             ->where('financial_year_id', '=', $year->id)
                             ->get();
-                            
+
         if($User_declarations){
             foreach($User_declarations as $User_declaration){
 
@@ -89,7 +89,7 @@ class familyMemberController extends Controller
                     'user_declaration_id' => $User_declaration->id,
                     'declaration_section_count' => $Declaration_section->count(),
                     'is_pl' => '1',
-                    
+
                 ]);
             }
         }
@@ -159,6 +159,24 @@ class familyMemberController extends Controller
             $member->delete();
 
             return response()->json(['statusCode' => 200, 'message'=>'Umefanikiwa kufuta mwanafamilia/mtegemezi kikamilifu!']);
-        
+
+    }
+    public function deactivateFamilyMember(Request $request)
+    {
+            $member = Family_member::where('id','=',$request->member_id)->first();
+
+            if($member->family_member_type_id == 1 || $member->family_member_type_id == 2){
+                $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
+                if($menu_lookup){
+                    $menu_lookup->stage_two = false;
+                    $menu_lookup->save();
+                }
+            }
+
+            $member->status_id = 0;
+            $member->save();
+
+            return response()->json(['statusCode' => 200, 'message'=>'Umefanikiwa kufuta mwanafamilia/mtegemezi kikamilifu!']);
+
     }
 }

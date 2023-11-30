@@ -72,7 +72,8 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('family-members', 'getFamilyMembers');
         Route::get('edit/family-member/{id?}', 'editFamilyMember');
         Route::post('update/family-member/{id?}', 'updateFamilyMember');
-	Route::delete('delete/family-member/{token?}', 'deleteFamilyMember');
+	    Route::delete('delete/family-member/{token?}', 'deleteFamilyMember');
+	    Route::post('deactivateFamilyMember', 'deactivateFamilyMember');
     });
 
  Route::controller(KiongoziController::class)->group(function (){
