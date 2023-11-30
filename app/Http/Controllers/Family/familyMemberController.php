@@ -163,7 +163,9 @@ class familyMemberController extends Controller
     }
     public function deactivateFamilyMember(Request $request)
     {
-            $member = Family_member::where('id','=',$request->user_id)->first();
+        $member = Family_member::where('id','=',$request->user_id)->first();
+
+        if($member){
 
             if($member->family_member_type_id == 1 || $member->family_member_type_id == 2){
                 $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
@@ -177,6 +179,10 @@ class familyMemberController extends Controller
             $member->save();
 
             return response()->json(['statusCode' => 200, 'message'=>'Umefanikiwa kufuta mwanafamilia/mtegemezi kikamilifu!']);
+        }else{
+            return response()->json(['statusCode' => 400, 'message'=>'Hekuna taarifa za mwanafamilia/mtegemezi!']);
+
+        }
 
     }
 }
