@@ -165,6 +165,7 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::get('emis/{end_point}', 'get_api');
     Route::get('listApprovedIntegrity', 'listApprovedIntegrity');
     Route::get('MyListIntegrityPledge', 'MyListIntegrityPledge');
-    Route::get('apply-integrity', 'applyIntegrity');
-    Route::get('NIDA-Verifier', 'NIDAVerifier');
+    Route::post('apply-integrity', 'applyIntegrity');
+    Route::post('NIDA-Verifier', 'NIDAVerifier');
+    Route::post('updateUser', 'updateUser');
 });

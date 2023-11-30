@@ -88,11 +88,12 @@ class lookUpDataController extends Controller
         }
     }
 
-    public function applyIntegrity(){
+    public function applyIntegrity(Request $request){
 
         $URL  = externalURL().'apply-integrity';
         try{
-        $result  =  Http::get($URL);
+        $data = $request->all();
+        $result = Http::post($URL, $data);
         $result = json_decode($result);
         return response()->json($result);
 
@@ -105,11 +106,30 @@ class lookUpDataController extends Controller
         }
     }
 
-    public function NIDAVerifier(){
+    public function NIDAVerifier(Request $request){
 
         $URL  = externalURL().'NIDA-Verifier';
         try{
-        $result  =  Http::get($URL);
+        $data = $request->all();
+        $result = Http::post($URL, $data);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function updateUser(Request $request){
+
+        $URL  = externalURL().'updateUser';
+        try{
+        $data = $request->all();
+        $result = Http::post($URL, $data);
         $result = json_decode($result);
         return response()->json($result);
 
