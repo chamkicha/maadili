@@ -163,7 +163,7 @@ class familyMemberController extends Controller
     }
     public function deactivateFamilyMember(Request $request)
     {
-            $member = Family_member::where('id','=',$request->member_id)->first();
+            $member = Family_member::where('id','=',$request->user_id)->first();
 
             if($member->family_member_type_id == 1 || $member->family_member_type_id == 2){
                 $menu_lookup = Menu_lookup::where('user_id','=',auth()->user()->id)->first();
