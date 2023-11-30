@@ -64,7 +64,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('declaration/ADFSubmittedList', 'ADFSubmittedList');
         Route::post('declaration/updateSectionData', 'updateSectionData');
         Route::post('declaration/apply-integrity-pledge', 'integrityPledge');
-        
+
     });
 
     Route::controller(familyMemberController::class)->group(function (){
@@ -126,7 +126,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('councils/{district_id?}', 'councils');
     Route::get('villages/{ward_id?}', 'villages');
     Route::get('get_selected_date', 'get_selected_date');
-    
+
 });
 
 });
@@ -161,6 +161,10 @@ Route::controller(notificationController::class)->group(function () {
     Route::get('instructions', 'instructions');
 });
 
-    Route::controller(lookUpDataController::class)->group(function () {
-        Route::get('emis/{end_point}', 'get_api');
-    });
+Route::controller(lookUpDataController::class)->group(function () {
+    Route::get('emis/{end_point}', 'get_api');
+    Route::get('listApprovedIntegrity', 'listApprovedIntegrity');
+    Route::get('MyListIntegrityPledge', 'MyListIntegrityPledge');
+    Route::get('apply-integrity', 'applyIntegrity');
+    Route::get('NIDA-Verifier', 'NIDAVerifier');
+});

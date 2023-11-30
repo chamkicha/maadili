@@ -5,6 +5,13 @@ use App\Models\User_declaration;
 use App\Models\Declaration_type;
 use App\Models\Section;
 
+function externalURL(){
+
+    $URL = 'http://41.59.227.219:8089/api/';
+    return $URL;
+}
+
+
 if (!function_exists('createMenuLookup')) {
     function createMenuLookup($stage)
     {
@@ -25,7 +32,7 @@ if (!function_exists('createMenuLookup')) {
 
     }
 
-    
+
 }
 
 if (!function_exists('sectioncountAll')) {
@@ -50,12 +57,12 @@ if (!function_exists('sectioncountAll')) {
             }else{
                 return 0;
             }
-            
+
         }
 
     }
 
-    
+
 }
 
 if (!function_exists('sectioncount')) {
@@ -82,7 +89,7 @@ if (!function_exists('sectioncount')) {
                     ->where('is_pl', $is_pl)
                     ->where('is_deleted','1')
                     ->first();
-                
+
                     if($section_datas) {
                         $count_section_data[] = 1;
                     }
@@ -96,12 +103,12 @@ if (!function_exists('sectioncount')) {
                 return 0;
             }
 
-            
+
         }
 
     }
 
-    
+
 }
 
 
@@ -141,7 +148,7 @@ if (!function_exists('menuLookupCheck')) {
 
 
     }else{
-        
+
         return response()->json([
             'statusCode' => 400,
             'message' => 'Ndugu kiongozi tafadhali jaza kwanza taarifa binafsi ili uweze kuendelea.',

@@ -39,7 +39,7 @@ class lookUpDataController extends Controller
 {
     public function get_api($endpoint){
 
-        $URL  = 'http://api.maadili.go.tz:9003/emis/'.$endpoint;        
+        $URL  = 'http://api.maadili.go.tz:9003/emis/'.$endpoint;
         try{
         $result  =  Http::get($URL);
         $result = json_decode($result);
@@ -52,8 +52,74 @@ class lookUpDataController extends Controller
                 'error' => $error,
             ]);
         }
+    }
 
+    public function listApprovedIntegrity(){
 
+        $URL  = externalURL().'listApprovedIntegrity';
+        try{
+        $result  =  Http::get($URL);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function MyListIntegrityPledge(){
+
+        $URL  = externalURL().'MyListIntegrityPledge';
+        try{
+        $result  =  Http::get($URL);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function applyIntegrity(){
+
+        $URL  = externalURL().'apply-integrity';
+        try{
+        $result  =  Http::get($URL);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function NIDAVerifier(){
+
+        $URL  = externalURL().'NIDA-Verifier';
+        try{
+        $result  =  Http::get($URL);
+        $result = json_decode($result);
+        return response()->json($result);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong.',
+                'error' => $error,
+            ]);
+        }
     }
 
     public function get_selected_date(){
@@ -82,7 +148,7 @@ class lookUpDataController extends Controller
             'section_id' => 'required|integer',
             'freeze_type_id' => 'required|string',
         ]);
-    
+
         if ($validator->fails()) {
             return response()->json([
                 'statusCode' => 402,

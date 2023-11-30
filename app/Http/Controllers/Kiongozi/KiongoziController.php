@@ -22,7 +22,7 @@ class KiongoziController extends Controller
                        ->with('userDeclaration')->with('councils')->with('village')->with('ainaya_ajira')->where('user_id','=',auth()->user()->id)->orderByDesc('id')->get();
             $response =  ['statusCode' => 200, 'taarifa_za_ajira' => $kiongozi ];
             return response()->json($response);
-        
+
     }
 
     public function ajiraTaarifa(Request $request)
@@ -34,13 +34,13 @@ class KiongoziController extends Controller
             'other_revenue' => 'required|string',
             'last_title' => 'required|string',
             'last_date_employment' => 'required|string',
-            'last_end_title_date' => 'required|string',                
+            'last_end_title_date' => 'required|string',
         ]);
 
         if ($validator->fails()) {
             return response()->json($validator->errors());
         }
-   
+
      $latestData = Sectiontaarafa478::where('user_id','=',auth()->user()->id)->latest()->first();
         if ($latestData) {
             $latestData->is_active = false;
@@ -80,7 +80,7 @@ class KiongoziController extends Controller
     $user->title_id=$kiongozi ->title_id;
     $user->update();
     }
-    
+
     $createMenuLookup = createMenuLookup('stage_three');
 
 $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kusajili taarifa zako za Ajira'];
@@ -98,7 +98,7 @@ return response()->json($response);
         $validator = Validator::make($request->all(),[
             'date_employment' => 'required|string',
             'posh' => 'required|string',
-            'other_revenue' => 'required|string',
+            // 'other_revenue' => 'required|string',
             'last_title' => 'required|string',
             'last_date_employment' => 'required|string',
             'last_end_title_date' => 'required|string',
@@ -141,7 +141,7 @@ return response()->json($response);
             $user->title_id=$kiongozi ->title_id;
             $user->update();
        }
-      
+
        $createMenuLookup = createMenuLookup('stage_three');
 
        $response =  ['statusCode' => 200, 'message' => 'Umefanikiwa kurekebisha taarifa zako za Ajira'];
@@ -151,7 +151,7 @@ return response()->json($response);
     public function file_number($request){
 
         $user = User::where('id','=',auth()->user()->id)->first();
-        $kanda = Zone::join('regions','regions.zone_id','=','zones.id') 
+        $kanda = Zone::join('regions','regions.zone_id','=','zones.id')
                        ->where('regions.id',$request->mkoa_sasa)
                       ->first();
         if($kanda){
@@ -198,7 +198,7 @@ return response()->json($response);
         $namba = '01';
 
         }
-        
+
         $file_number = 'ES'.'/'.$kanda.'/'.$CPF.'/'.$taasisi.'/'.$cheo.'/'.$namba;
 
         return $file_number;
