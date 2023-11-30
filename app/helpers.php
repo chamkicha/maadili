@@ -5,10 +5,12 @@ use App\Models\User_declaration;
 use App\Models\Declaration_type;
 use App\Models\Section;
 
-function externalURL(){
+if (!function_exists('externalURL')) {
+    function externalURL(){
 
-    $URL = 'http://41.59.227.219:8089/api/';
-    return $URL;
+        $URL = 'http://41.59.227.219:8089/api/';
+        return $URL;
+    }
 }
 
 
