@@ -115,7 +115,11 @@ class lookUpDataController extends Controller
 
         $URL  = externalURL().'NIDA-Verifier';
         try{
-        $data = $request->all();
+        $data = [
+            "NIN" => $request->NIN,
+            "ANSWER" => $request->ANSWER ?? '',
+            "RQCODE" => $request->RQCODE ?? ''
+        ];
         $result = Http::post($URL, $data);
         $result = json_decode($result);
         return response()->json($result);
@@ -124,7 +128,7 @@ class lookUpDataController extends Controller
             return response()->json([
                 'statusCode' => 402,
                 'message' => 'something went wrong.',
-                'error' => $error,
+                'error' => $error->getMessage(),
             ]);
         }
     }
