@@ -37,9 +37,14 @@ use Illuminate\Support\Facades\Http;
 
 class lookUpDataController extends Controller
 {
-    public function get_api($endpoint){
+    // public function get_api($endpoint,$values = ''){
+    public function get_api($end_point, $value = null){
 
-        $URL  = 'http://api.maadili.go.tz:9003/emis/'.$endpoint;
+        if($value){
+            $URL  = 'http://api.maadili.go.tz:9003/emis/'.$end_point.'/'.$value;
+        }else{
+            $URL  = 'http://api.maadili.go.tz:9003/emis/'.$end_point;
+        }
         try{
         $result  =  Http::get($URL);
         $result = json_decode($result);
