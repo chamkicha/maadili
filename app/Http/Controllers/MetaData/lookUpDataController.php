@@ -59,11 +59,13 @@ class lookUpDataController extends Controller
         }
     }
 
-    public function listApprovedIntegrity(){
+    public function listApprovedIntegrity(Request $request){
 
         $URL  = externalURL().'listApprovedIntegrity';
         try{
-        $result  =  Http::get($URL);
+
+        $data = $request->all();
+        $result = Http::post($URL, $data);
         $result = json_decode($result);
         return response()->json($result);
 
