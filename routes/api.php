@@ -165,7 +165,7 @@ Route::controller(notificationController::class)->group(function () {
 Route::controller(lookUpDataController::class)->group(function () {
     Route::get('emis/{end_point}/{value?}', 'get_api');
     Route::get('listApprovedIntegrity', 'listApprovedIntegrity');
-    Route::get('MyListIntegrityPledge', 'MyListIntegrityPledge');
+    Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
     Route::post('apply-integrity', 'applyIntegrity');
     Route::post('NIDA-Verifier', 'NIDAVerifier');
     Route::post('updateUser', 'updateUser');
