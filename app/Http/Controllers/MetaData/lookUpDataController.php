@@ -78,11 +78,12 @@ class lookUpDataController extends Controller
         }
     }
 
-    public function MyListIntegrityPledge(){
+    public function MyListIntegrityPledge(Request $request){
 
         $URL  = externalURL().'MyListIntegrityPledge';
         try{
-        $result  =  Http::get($URL);
+        $data = $request->all();
+        $result = Http::post($URL, $data);
         $result = json_decode($result);
         return response()->json($result);
 

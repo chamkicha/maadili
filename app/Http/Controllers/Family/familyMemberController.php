@@ -12,6 +12,7 @@ use App\Models\User_declaration;
 use App\Models\Financial_year;
 use App\Models\UserDeclarationsLookup;
 use App\Models\Declaration_section;
+use Illuminate\Support\Facades\Log;
 
 
 class familyMemberController extends Controller
@@ -163,6 +164,7 @@ class familyMemberController extends Controller
     }
     public function deactivateFamilyMember(Request $request)
     {
+        // Log::debug($request);
         $member = Family_member::where('id','=',$request->user_id)->first();
 
         if($member){

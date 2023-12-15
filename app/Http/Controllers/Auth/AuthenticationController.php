@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use DB;
 
 class AuthenticationController extends Controller
 {
@@ -24,6 +25,7 @@ class AuthenticationController extends Controller
      */
     public function login(Request $request): JsonResponse
     {
+        // dd(DB::table('users')->get());
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
