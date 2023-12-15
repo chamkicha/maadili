@@ -115,7 +115,7 @@ class lookUpDataController extends Controller
 
     public function NIDAVerifier(Request $request){
 
-        $URL  = externalURL().'NIDA-Verifier';
+        $URL  = nidaURL().'NIDA-Verifier';
         try{
         $data = [
             "NIN" => $request->NIN,

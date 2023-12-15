@@ -8,7 +8,19 @@ use App\Models\Section;
 if (!function_exists('externalURL')) {
     function externalURL(){
 
+        // $URL = 'http://41.59.227.219:8089/api/';
+        $URL = 'http://api.maadili.go.tz:9003/';
+
+        return $URL;
+    }
+}
+
+if (!function_exists('nidaURL')) {
+    function nidaURL(){
+
         $URL = 'http://41.59.227.219:8089/api/';
+        // $URL = 'http://api.maadili.go.tz:9003/';
+
         return $URL;
     }
 }
