@@ -28,18 +28,18 @@ class KiongoziController extends Controller
     public function ajiraTaarifa(Request $request)
     {
 
-        $validator = Validator::make($request->all(), [
-            'date_employment' => 'required|string',
-            'posh' => 'required|string',
-            'other_revenue' => 'required|string',
-            'last_title' => 'required|string',
-            'last_date_employment' => 'required|string',
-            'last_end_title_date' => 'required|string',
-        ]);
+        // $validator = Validator::make($request->all(), [
+        //     'date_employment' => 'required|string',
+        //     'posh' => 'required|string',
+        //     'other_revenue' => 'required|string',
+        //     'last_title' => 'required|string',
+        //     'last_date_employment' => 'required|string',
+        //     'last_end_title_date' => 'required|string',
+        // ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors());
-        }
+        // if ($validator->fails()) {
+        //     return response()->json($validator->errors());
+        // }
 
      $latestData = Sectiontaarafa478::where('user_id','=',auth()->user()->id)->latest()->first();
         if ($latestData) {
