@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use DB;
+use Illuminate\Support\Facades\Log;
 
 class AuthenticationController extends Controller
 {
@@ -40,7 +41,6 @@ class AuthenticationController extends Controller
 
         $phone_to_check = str_replace("-", "", $login_type);
 
-
         if (strlen($phone_to_check) >= 9 && strlen($phone_to_check) <= 13) {
 
             $user_name =  "phone_number";
@@ -57,6 +57,7 @@ class AuthenticationController extends Controller
         $request->merge([
             $user_name => $request->input('username')
         ]);
+        // Log::debug($request);
 
         try {
 

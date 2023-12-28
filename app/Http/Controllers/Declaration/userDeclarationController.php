@@ -1094,7 +1094,7 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
-        Log::debug($request);
+        // Log::debug($request);
 
 	 $validator = Validator::make($request->all(), [
             'user_declaration_id' => 'required|integer',

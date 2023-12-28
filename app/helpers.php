@@ -18,7 +18,8 @@ if (!function_exists('externalURL')) {
 if (!function_exists('nidaURL')) {
     function nidaURL(){
 
-        $URL = 'http://41.59.227.219:8089/api/';
+        $URL = 'http://10.20.62.6:8089/api/';
+        // $URL = 'http://41.59.227.219:8089/api/';
         // $URL = 'http://api.maadili.go.tz:9003/';
 
         return $URL;

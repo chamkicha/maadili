@@ -33,6 +33,7 @@ use DB;
 use Illuminate\Support\Facades\Validator;
 use App\Models\Sectiontaarafa478;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 
 class lookUpDataController extends Controller
@@ -138,11 +139,12 @@ class lookUpDataController extends Controller
 
     public function updateUser(Request $request){
 
-        $URL  = externalURL().'updateUser';
+        $URL  = nidaURL().'updateUser';
         try{
         $data = $request->all();
         $result = Http::post($URL, $data);
         $result = json_decode($result);
+
         return response()->json($result);
 
         }catch (Exception $error) {
