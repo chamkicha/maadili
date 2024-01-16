@@ -957,6 +957,7 @@ class userDeclarationController extends Controller
 
     public function declarationSave(Request $request)
     {
+        Log::debug($request);
 
         $validator = Validator::make($request->all(), [
             'declaration_type' => 'required|integer',
@@ -1885,6 +1886,8 @@ class userDeclarationController extends Controller
                     'message' => 'Umefanikiwa kutuma taarifa za tamko kikamilifu', 
                     'table' => $table,
                     'data' => $data];
+
+                    //  Log::debug($response);
 
                     return response()->json($response);
                 }
