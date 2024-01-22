@@ -1289,7 +1289,7 @@ class userDeclarationController extends Controller
                                               ->with('councils')
                                               ->with('village')
                                               ->with('country')
-                                              ->latest('created_at')
+                                              ->orderBy('id', 'desc')
                                               ->first();
 
         $password = Declaration_download::where('user_declaration_id',$declaration->id)->orderByDesc('id')->first();

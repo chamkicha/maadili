@@ -93,6 +93,7 @@ return response()->json($response);
         $response =  ['statusCode' => 200, 'ajira' => $kiongozi ];
         return response()->json($response);
     }
+    
     public function updateAjiraTaarifa(Request $request ,$token)
     {
         $validator = Validator::make($request->all(),[
