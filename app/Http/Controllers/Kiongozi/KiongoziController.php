@@ -12,6 +12,7 @@ use App\Models\Zone;
 use App\Models\Office;
 use App\Models\Title;
 use DB;
+use Illuminate\Support\Facades\Log;
 
 
 class KiongoziController extends Controller
@@ -48,6 +49,7 @@ class KiongoziController extends Controller
         }
 
    $user = User::where('id','=',auth()->user()->id)->first();
+   $file_number = $this->file_number($request);
 
         $isactive=true;
    $kiongozi = Sectiontaarafa478::updateOrCreate([
@@ -77,6 +79,7 @@ class KiongoziController extends Controller
     'is_active' => $isactive
 ]);
  if( $kiongozi){
+    $user->file_number= $file_number;
     $user->title_id=$kiongozi ->title_id;
     $user->update();
     }
@@ -112,7 +115,7 @@ return response()->json($response);
 
     $file_number = $this->file_number($request);
 
-        $isactive=true;
+       $isactive=true;
        $kiongozi = Sectiontaarafa478::where('secure_token','=',$token)->first();
        $kiongozi ->user_id = auth()->user()->id;
        $kiongozi ->title_id = $request->input('title_id');
@@ -137,11 +140,15 @@ return response()->json($response);
        $kiongozi ->last_end_title_date = $request->input('last_end_title_date');
        $kiongozi ->maelezo_ya_cheo_wadhifa = $request->input('maelezo_ya_cheo_wadhifa');
        $kiongozi ->is_active = $request->input('is_active');
-       if( $kiongozi->save()){
-            $user->file_number=$file_number;
-            $user->title_id=$kiongozi ->title_id;
-            $user->update();
-       }
+    //    if( $kiongozi->save()){
+    //         $user->update();
+    //    }
+       $user->file_number= $file_number;
+       $user->title_id= $kiongozi->title_id;
+       $user->save();
+       $kiongozi->save();
+
+
 
        $createMenuLookup = createMenuLookup('stage_three');
 
