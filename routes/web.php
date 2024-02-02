@@ -1,6 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Models\Sectiontaarafa478;
+use App\Models\User;
+use App\Http\Controllers\Kiongozi\KiongoziController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,6 +19,29 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+// Route::get('/test', function () {
+//     // $viongozi = User::where('phone_number', '255753158796')->get();
+//     // $taarifaAjiras = Sectiontaarafa478::where('user_id',$viongozi->id)->get();
+//     $viongozi = User::where('file_number', null)->get();
+//     $Ajira = [];
+//     foreach($viongozi as $kiongozi){
+//         $taarifaAjiras = Sectiontaarafa478::where('user_id',$kiongozi->id)->latest()->first();
+//         if($taarifaAjiras !== null){
+
+//             $fileNumber = file_number($taarifaAjiras);
+//             $user = User::where('id','=',$kiongozi->id)->first();
+//             $user->file_number= $fileNumber;
+//             $user->save();
+//             $Ajira[] = $kiongozi->id.' - '.$fileNumber;
+
+//         }
+//     }
+
+//     dd($Ajira);
+
+//     return view('welcome');
+// });
 
 Route::get('/login', function () {
     $response = ['message' => 'Unauthorized please login again'];

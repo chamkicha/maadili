@@ -4,6 +4,12 @@ use App\Models\Menu_lookup;
 use App\Models\User_declaration;
 use App\Models\Declaration_type;
 use App\Models\Section;
+use App\Models\Sectiontaarafa478;
+use App\Models\User;
+use App\Http\Controllers\Kiongozi\KiongoziController;
+use App\Models\Zone;
+use App\Models\Office;
+use App\Models\Title;
 
 if (!function_exists('externalURL')) {
     function externalURL(){
@@ -24,6 +30,65 @@ if (!function_exists('nidaURL')) {
 
         return $URL;
     }
+}
+
+if (!function_exists('file_number')) {
+    function file_number($request){
+
+    $user = User::where('id','=',$request->user_id)->first();
+    $kanda = Zone::join('regions','regions.zone_id','=','zones.id')
+                   ->where('regions.id',$request->mkoa_sasa)
+                  ->first();
+    if($kanda){
+     $kanda = $kanda->abbreviation;
+    }else{
+     $kanda = 'HQ';
+    }
+
+    $taasisi = Office::where('id',$request->employer)->first();
+    if($taasisi){
+        $taasisi = $taasisi->abbreviation;
+
+    }else{
+        $taasisi ='PPRA';
+    }
+    $cheo = Title::where('id',$request->title_id)->first();
+    if($cheo){
+        $cheo = $cheo->abbreviation;
+
+    }else{
+        $cheo ='MNGR';
+    }
+
+    $CPF = 'CPF';
+
+    $file_number = 'ES'.'/'.$kanda.'/'.$CPF.$taasisi.'/'.$cheo;
+
+    $results = DB::table('users')->where('file_number', 'LIKE', $file_number.'%')->select('id','file_number')->get();
+
+    if($results){
+        $namba_array = [];
+        foreach($results as $result){
+            $lastTwoDigits = substr($result->file_number, -2);
+            $namba_array[] =$lastTwoDigits;
+        }
+
+        sort($namba_array);
+        $lastValue = intval(end($namba_array));
+
+        $namba = $lastValue + 1;
+        $namba = str_pad($namba, 2, '0', STR_PAD_LEFT);
+
+    }else{
+    $namba = '01';
+
+    }
+
+    $file_number = 'ES'.'/'.$kanda.'/'.$CPF.$taasisi.'/'.$cheo.'/'.$namba;
+
+    return $file_number;
+}
+
 }
 
 

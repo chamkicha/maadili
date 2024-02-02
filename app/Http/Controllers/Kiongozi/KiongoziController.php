@@ -49,9 +49,9 @@ class KiongoziController extends Controller
         }
 
    $user = User::where('id','=',auth()->user()->id)->first();
-   $file_number = $this->file_number($request);
+   $file_number = $this->file_number(file_number);
 
-        $isactive=true;
+    $isactive=true;
    $kiongozi = Sectiontaarafa478::updateOrCreate([
     'secure_token' => Str::uuid(),
     'user_id' => auth()->user()->id,
@@ -185,7 +185,7 @@ return response()->json($response);
 
         $CPF = 'CPF';
 
-        $file_number = 'ES'.'/'.$kanda.'/'.$CPF.'/'.$taasisi.'/'.$cheo;
+        $file_number = 'ES'.'/'.$kanda.'/'.$CPF.$taasisi.'/'.$cheo;
 
         $results = DB::table('users')->where('file_number', 'LIKE', $file_number.'%')->select('id','file_number')->get();
 
@@ -207,7 +207,7 @@ return response()->json($response);
 
         }
 
-        $file_number = 'ES'.'/'.$kanda.'/'.$CPF.'/'.$taasisi.'/'.$cheo.'/'.$namba;
+        $file_number = 'ES'.'/'.$kanda.'/'.$CPF.$taasisi.'/'.$cheo.'/'.$namba;
 
         return $file_number;
     }
