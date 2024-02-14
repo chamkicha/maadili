@@ -328,6 +328,80 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function Returneddeclaration(){
+        $declarations = User_declaration::with(['declaration_type.sections'])
+            // ->where('user_id','=', '6681')
+            ->where('user_id','=', auth()->user()->id)
+            ->where('flag', 'PL')
+            ->get();
+
+            if ($declarations->isEmpty()){
+                $response = ['statusCode' => 400, 'message' => "Hakuna tamko lililorudishwa kwa ajili ya marekebisho"];
+                return response()->json($response, 200);
+            }
+
+            foreach($declarations as $declaration){
+
+                foreach ($declaration->declaration_type->sections as $section) {
+                    // return  $section->table_name;
+
+                $Declaration_type = Declaration_type::with([
+                        'sections' => function ($query) {
+                       $query->orderBy('declaration_sections.section_flow', 'ASC')
+                               ->where('status_id',1)
+                               ->with(['declarationSections']);
+                   }
+                   ])
+                       ->where('id', '=', $declaration->declaration_type_id)
+                       ->first();
+
+
+                  $data = DB::table(strtolower($section->table_name))
+                    ->where('user_declaration_id', $declaration->id)
+                    ->get()
+                    ->map(function ($item) {
+                        if ($item->is_pl == 0) {
+                            $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                                        ->where('family_members.status_id','=',1)
+                                        ->where('family_members.id','=',$item->member_id)
+                                        ->select('family_member_types.member_sw','family_members.*')
+                                        ->first();
+
+                                        if($members){
+                                        $item->member_type = $members->member_sw;
+                                        $item->member_first_name = $members->first_name;
+                                        $item->member_middle_name = $members->middle_name;
+                                        $item->member_last_name = $members->last_name;
+
+                                        }else{
+                                        $item->member_type = null;
+                                        }
+                        }else{
+                            $item->member_type = "pl";
+                        }
+                        return $item;
+                    });
+
+                    $requirements = DB::table('requirements')
+                        ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                        ->join('sections','section_requirements.section_id','=','sections.id')
+                        ->where('sections.table_name','=',$section->table_name)
+                        ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                        ->get();
+
+                    $section->section_data= $data;
+                    $section->requirements = $requirements;
+
+                }
+
+            }
+
+            $response = ['statusCode' => 200, 'message' => 'Matamko/Tamko yaliyorudishwa' , 'declarations' => $declarations];
+            return response()->json($response, 200);
+
+
+    }
+
 
     public function DeclarationCreate(Request $request)
     {
@@ -1545,70 +1619,7 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
-    public function Returneddeclaration(){
-        $declarations = User_declaration::with(['declaration_type.sections'])
-            // ->where('user_id','=', '6681')
-            ->where('user_id','=', auth()->user()->id)
-            ->where('flag', 'PL')
-            ->get();
 
-            if ($declarations->isEmpty()){
-                $response = ['statusCode' => 400, 'message' => "Hakuna tamko lililorudishwa kwa ajili ya marekebisho"];
-                return response()->json($response, 200);
-            }
-
-            foreach($declarations as $declaration){
-
-                foreach ($declaration->declaration_type->sections as $section) {
-                    // return  $section->table_name;
-
-
-                  $data = DB::table(strtolower($section->table_name))
-                    ->where('user_declaration_id', $declaration->id)
-                    ->get()
-                    ->map(function ($item) {
-                        if ($item->is_pl == 0) {
-                            $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
-                                        ->where('family_members.status_id','=',1)
-                                        ->where('family_members.id','=',$item->member_id)
-                                        ->select('family_member_types.member_sw','family_members.*')
-                                        ->first();
-
-                                        if($members){
-                                        $item->member_type = $members->member_sw;
-                                        $item->member_first_name = $members->first_name;
-                                        $item->member_middle_name = $members->middle_name;
-                                        $item->member_last_name = $members->last_name;
-
-                                        }else{
-                                        $item->member_type = null;
-                                        }
-                        }else{
-                            $item->member_type = "pl";
-                        }
-                        return $item;
-                    });
-
-                    $requirements = DB::table('requirements')
-                        ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
-                        ->join('sections','section_requirements.section_id','=','sections.id')
-                        ->where('sections.table_name','=',$section->table_name)
-                        ->where('pl_status','1')
-                        ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
-                        ->get();
-
-                    $section->section_data= $data;
-                    $section->requirements = $requirements;
-
-                }
-
-            }
-
-            $response = ['statusCode' => 200, 'message' => 'Matamko/Tamko yaliyorudishwa' , 'declarations' => $declarations];
-            return response()->json($response, 200);
-
-
-    }
 
     public function downloadAdfAuth(Request $request): JsonResponse
     {
