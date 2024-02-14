@@ -98,12 +98,17 @@ class lookUpDataController extends Controller
     }
 
     public function applyIntegrity(Request $request){
+        
+        
 
         $URL  = externalURL().'apply-integrity';
         try{
         $data = $request->all();
         $result = Http::post($URL, $data);
+        Log::info('applyIntegrity - '.$result);
         $result = json_decode($result);
+
+        
         return response()->json($result);
 
         }catch (Exception $error) {
