@@ -64,6 +64,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('declaration/ADFSubmittedList', 'ADFSubmittedList');
         Route::post('declaration/updateSectionData', 'updateSectionData');
         Route::post('declaration/apply-integrity-pledge', 'integrityPledge');
+        Route::get('declaration/returned-declarations', 'Returneddeclaration');
 
     });
 
@@ -169,4 +170,5 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::post('apply-integrity', 'applyIntegrity');
     Route::post('NIDA-Verifier', 'NIDAVerifier');
     Route::post('updateUser', 'updateUser');
+    Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
 });

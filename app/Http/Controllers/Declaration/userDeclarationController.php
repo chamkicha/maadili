@@ -1545,6 +1545,37 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
+    public function Returneddeclaration(){
+        $declarations = User_declaration::with(['declaration_type.sections'])
+            // ->where('user_id','=', '6681')
+            ->where('user_id','=', auth()->user()->id)
+            ->where('flag', 'PL')
+            ->get();
+
+            if ($declarations->isEmpty()){
+                $response = ['statusCode' => 400, 'message' => "Hakuna tamko lililorudishwa kwa ajili ya marekebisho"];
+                return response()->json($response, 200);
+            }
+
+            foreach($declarations as $declaration){
+
+                foreach ($declaration->declaration_type->sections as $section) {
+                    // return  $section->table_name;
+                    $data = DB::table(strtolower($section->table_name))
+                        ->where('user_declaration_id', $declaration->id)
+                        ->where('pl_status','1')
+                        ->get();
+                    $section->section_data= $data;
+                }
+
+            }
+
+            $response = ['statusCode' => 200, 'message' => 'Matamko/Tamko yaliyorudishwa' , 'declarations' => $declarations];
+            return response()->json($response, 200);
+
+
+    }
+
     public function downloadAdfAuth(Request $request): JsonResponse
     {
         $year = Financial_year::where('is_active', '=', 1)->first();
