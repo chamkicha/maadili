@@ -1561,11 +1561,45 @@ class userDeclarationController extends Controller
 
                 foreach ($declaration->declaration_type->sections as $section) {
                     // return  $section->table_name;
-                    $data = DB::table(strtolower($section->table_name))
-                        ->where('user_declaration_id', $declaration->id)
+
+
+                  $data = DB::table(strtolower($section->table_name))
+                    ->where('user_declaration_id', $declaration->id)
+                    ->get()
+                    ->map(function ($item) {
+                        if ($item->is_pl == 0) {
+                            $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                                        ->where('family_members.status_id','=',1)
+                                        ->where('family_members.id','=',$item->member_id)
+                                        ->select('family_member_types.member_sw','family_members.*')
+                                        ->first();
+
+                                        if($members){
+                                        $item->member_type = $members->member_sw;
+                                        $item->member_first_name = $members->first_name;
+                                        $item->member_middle_name = $members->middle_name;
+                                        $item->member_last_name = $members->last_name;
+
+                                        }else{
+                                        $item->member_type = null;
+                                        }
+                        }else{
+                            $item->member_type = "pl";
+                        }
+                        return $item;
+                    });
+
+                    $requirements = DB::table('requirements')
+                        ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                        ->join('sections','section_requirements.section_id','=','sections.id')
+                        ->where('sections.table_name','=',$section->table_name)
                         ->where('pl_status','1')
+                        ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
                         ->get();
+
                     $section->section_data= $data;
+                    $section->requirements = $requirements;
+
                 }
 
             }
