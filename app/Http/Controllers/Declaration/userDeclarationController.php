@@ -386,7 +386,7 @@ class userDeclarationController extends Controller
                         ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
                         ->join('sections','section_requirements.section_id','=','sections.id')
                         ->where('sections.table_name','=',$section->table_name)
-                        ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                        ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type','requirements.end_point')
                         ->get();
 
                     $section->section_data= $data;

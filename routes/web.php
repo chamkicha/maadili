@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Models\Sectiontaarafa478;
 
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -18,7 +19,6 @@ use App\Models\Sectiontaarafa478;
 Route::get('/', function () {
     return view('welcome');
 });
-
 
 
 Route::get('/login', function () {
