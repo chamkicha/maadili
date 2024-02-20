@@ -12,9 +12,16 @@ class IntegrityPledgeController extends Controller
 {
     public function MyListIntegrityPledge(){
         try{
-            $integrity_pledge = integrity_pledge::whereIn('approval_status',['RECEIVED','PENDING'])
+            $integrity_pledge = integrity_pledge::with('user','title')->whereIn('approval_status',['RECEIVED','PENDING'])
                                 ->where('user_id',auth()->user()->id)
                                 ->get();
+
+                        $integrity_pledge->map(function ($item) {
+                            $item->full_name = $item->user->first_name . ' ' . $item->user->middle_name . ' ' . $item->user->last_name;
+                            $item->title_name = $item->title->title_sw;
+                            return $item;
+                        });
+
                 if($integrity_pledge){
                     $response = [
                         'statusCode' => 200,
@@ -47,9 +54,16 @@ class IntegrityPledgeController extends Controller
     public function listApprovedIntegrity(){
         try{
 
-             $integrity_pledge = integrity_pledge::where('approval_status','APPROVED')
+             $integrity_pledge = integrity_pledge::with('user','title')->where('approval_status','APPROVED')
                                 ->where('user_id',auth()->user()->id)
                                 ->get();
+
+                    $integrity_pledge->map(function ($item) {
+                        $item->full_name = $item->user->first_name . ' ' . $item->user->middle_name . ' ' . $item->user->last_name;
+                        $item->title_name = $item->title->title_sw;
+                        return $item;
+                    });
+
                 if($integrity_pledge){
                     $response = [
                         'statusCode' => 200,
@@ -84,9 +98,16 @@ class IntegrityPledgeController extends Controller
     public function listIntegrityPledge(){
         try{
 
-             $integrity_pledge = integrity_pledge::where('approval_status','RECEIVED')
+             $integrity_pledge = integrity_pledge::with('user','title')->where('approval_status','RECEIVED')
                                 ->where('user_id',auth()->user()->id)
                                 ->get();
+
+                                $integrity_pledge->map(function ($item) {
+                                    $item->full_name = $item->user->first_name . ' ' . $item->user->middle_name . ' ' . $item->user->last_name;
+                                    $item->title_name = $item->title->title_sw;
+                                    return $item;
+                                });
+                                
                 if($integrity_pledge){
                     $response = [
                         'statusCode' => 200,

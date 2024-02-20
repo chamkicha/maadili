@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class integrity_pledge extends Model
 {
-    
+
     protected $table='integrity_pledge';
     use HasFactory;
 
@@ -19,4 +19,17 @@ class integrity_pledge extends Model
         'current_stage',
         'approval_status'
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class,'user_id','id');
+    }
+
+    public function title()
+    {
+        return $this->belongsTo(Title::class,'title_id','id');
+    }
+
+
+
 }
