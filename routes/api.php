@@ -105,6 +105,8 @@ Route::middleware('auth:sanctum')->group( function () {
 
   Route::controller(IntegrityPledgeController::class)->group(function (){
     Route::get('MyListIntegrityPledge', 'MyListIntegrityPledge');
+    Route::get('listApprovedIntegrity','listApprovedIntegrity');
+    Route::get('listIntegrityPledge','listIntegrityPledge');
  });
 
 

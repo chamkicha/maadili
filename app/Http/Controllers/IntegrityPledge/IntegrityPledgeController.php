@@ -43,4 +43,76 @@ class IntegrityPledgeController extends Controller
             ]);
         }
     }
+
+    public function listApprovedIntegrity(){
+        try{
+
+             $integrity_pledge = integrity_pledge::where('approval_status','APPROVED')
+                                ->where('user_id',auth()->user()->id)
+                                ->get();
+                if($integrity_pledge){
+                    $response = [
+                        'statusCode' => 200,
+                        'message' => 'Fetch Successfully',
+                        'integrity_pledge' => $integrity_pledge,
+                        'sections' => []
+                    ];
+
+                }else{
+                    $response = [
+                        'statusCode' => 402,
+                        'message' => 'Hakuna Data',
+                        'integrity_pledge' => [],
+                        'sections' => []
+                    ];
+
+                }
+
+            return response()->json($response);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong ',
+                'error' => $error->getMessage(),
+            ]);
+        }
+    }
+
+
+
+    public function listIntegrityPledge(){
+        try{
+
+             $integrity_pledge = integrity_pledge::where('approval_status','RECEIVED')
+                                ->where('user_id',auth()->user()->id)
+                                ->get();
+                if($integrity_pledge){
+                    $response = [
+                        'statusCode' => 200,
+                        'message' => 'Fetch Successfully',
+                        'integrity_pledge' => $integrity_pledge,
+                        'sections' => []
+                    ];
+
+                }else{
+                    $response = [
+                        'statusCode' => 402,
+                        'message' => 'Hakuna Data',
+                        'integrity_pledge' => [],
+                        'sections' => []
+                    ];
+
+                }
+
+            return response()->json($response);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong ',
+                'error' => $error->getMessage(),
+            ]);
+        }
+    }
 }
