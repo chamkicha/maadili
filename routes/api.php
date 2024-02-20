@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\forgotPasswordController;
 use App\Http\Controllers\RejestaZawadi\rejestaZawadiController;
+use App\Http\Controllers\IntegrityPledge\IntegrityPledgeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,6 +102,12 @@ Route::middleware('auth:sanctum')->group( function () {
   });
 
 
+
+  Route::controller(IntegrityPledgeController::class)->group(function (){
+    Route::get('MyListIntegrityPledge', 'MyListIntegrityPledge');
+ });
+
+
     Route::controller(lookUpDataController::class)->group(function () {
     Route::get('family-member-type', 'familyMemberType');
     Route::get('menuLookup', 'menuLookup');
@@ -166,9 +173,8 @@ Route::controller(notificationController::class)->group(function () {
 Route::controller(lookUpDataController::class)->group(function () {
     Route::get('emis/{end_point}/{value?}', 'get_api');
     Route::post('listApprovedIntegrity', 'listApprovedIntegrity');
-    Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
+    // Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
     Route::post('apply-integrity', 'applyIntegrity');
     Route::post('NIDA-Verifier', 'NIDAVerifier');
     Route::post('updateUser', 'updateUser');
-    Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
 });
