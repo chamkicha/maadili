@@ -1137,6 +1137,111 @@ class userDeclarationController extends Controller
 
     }
 
+    public function updateReturnedSectionData(Request $request)
+    {
+        // Log::debug($request);
+
+        $validator = Validator::make($request->all(), [
+            'table' => 'required|string',
+            'key' => 'required|string',
+            'value' => 'required|string',
+            'id' => 'required|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+        try {
+
+        $table = strtolower($request->table);
+        $key = $request->key;
+
+        if (!Schema::hasColumn($table, $key)) {
+            Schema::table($table, function ($table) use ($key) {
+                $table->string($key)->nullable();
+            });
+        }
+
+        DB::table($table)->where('id','=',$request->id)->update([
+            $request->key => $request->value,
+            'pl_status' => '2'
+        ]);
+
+
+        $update = DB::table($table)->where('id','=',$request->id)->first();
+
+
+        $response = ['statusCode' => 200,
+                    'message' => 'Ndugu kiongozi, Umefanikiwa kurekebisha taarifa zako',
+                    'table' => $table,
+                    'data' => $update
+                   ];
+
+        return response()->json($response);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+
+
+    }
+
+
+
+    public function returnedDeclarationSubmission(Request $request): JsonResponse
+    {
+        Log::debug($request);
+
+	 $validator = Validator::make($request->all(), [
+            'user_declaration_id' => 'required|integer',
+            'flag' => 'required|string'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        $today = Carbon::now();
+
+        $year = Financial_year::where('is_active', '=', true)->first();
+
+        $data = User_declaration::where('id', '=', $request->user_declaration_id)->first();
+
+        if ($data) {
+
+            $data->flag = $request->input('flag');
+
+            $data->save();
+
+            $response = [
+                'statusCode' => 200,
+                'message' => 'Umefanikiwa kutuma Tamko Sekretarieti ya maadili, Ahsante.',
+                'data' => $data
+            ];
+        } else {
+            $response = [
+                'statusCode' => 404,
+                'message' => 'User declaration haipatikani.'
+            ];
+        }
+
+        return response()->json($response);
+    }
+
     public function updateSection(Request $request,$id)
     {
 

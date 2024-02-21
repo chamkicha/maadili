@@ -66,6 +66,9 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('declaration/updateSectionData', 'updateSectionData');
         Route::post('declaration/apply-integrity-pledge', 'integrityPledge');
         Route::get('declaration/returned-declarations', 'Returneddeclaration');
+        Route::get('declaration/updateReturnedSectionData', 'updateReturnedSectionData');
+        Route::get('declaration/returnedDeclarationSubmission', 'returnedDeclarationSubmission');
+
 
     });
 

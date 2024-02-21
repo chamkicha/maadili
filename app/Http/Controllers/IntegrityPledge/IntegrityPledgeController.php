@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\integrity_pledge;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class IntegrityPledgeController extends Controller
 {
@@ -61,6 +62,8 @@ class IntegrityPledgeController extends Controller
                     $integrity_pledge->map(function ($item) {
                         $item->full_name = $item->user->first_name . ' ' . $item->user->middle_name . ' ' . $item->user->last_name;
                         $item->title_name = $item->title->title_sw;
+                        $item->signed_date = Carbon::parse($item->created_at)->toDateString();
+                        $item->signature = $item->user->signature_image;
                         return $item;
                     });
 
@@ -107,7 +110,7 @@ class IntegrityPledgeController extends Controller
                                     $item->title_name = $item->title->title_sw;
                                     return $item;
                                 });
-                                
+
                 if($integrity_pledge){
                     $response = [
                         'statusCode' => 200,
