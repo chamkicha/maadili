@@ -348,7 +348,7 @@ class userDeclarationController extends Controller
                 $Declaration_type = Declaration_type::with([
                         'sections' => function ($query) {
                        $query->orderBy('declaration_sections.section_flow', 'ASC')
-                               ->whereIn('status_id',['1','2'])
+                               ->where('status_id',1)
                                ->with(['declarationSections']);
                    }
                    ])
