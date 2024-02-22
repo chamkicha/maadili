@@ -5,6 +5,7 @@ namespace App\Http\Controllers\IntegrityPledge;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\integrity_pledge;
+use App\Models\integrity_pledge_approval;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
@@ -64,6 +65,18 @@ class IntegrityPledgeController extends Controller
                         $item->title_name = $item->title->title_sw;
                         $item->signed_date = Carbon::parse($item->created_at)->toDateString();
                         $item->signature = $item->user->signature_image;
+
+                        $item->integrity_pledge_approval = integrity_pledge_approval::with(['integrity_pledge', 'staff'])
+                            ->where('approval_status', 'APPROVED')
+                            ->first();
+
+                        if ($item->integrity_pledge_approval && $item->integrity_pledge_approval->staff) {
+                            $item->approver = $item->integrity_pledge_approval->staff->full_name;
+                        } else {
+                            $item->approver = null;
+                        }
+
+
                         return $item;
                     });
 

@@ -68,8 +68,6 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::get('declaration/returned-declarations', 'Returneddeclaration');
         Route::post('declaration/updateReturnedSectionData', 'updateReturnedSectionData');
         Route::post('declaration/returnedDeclarationSubmission', 'returnedDeclarationSubmission');
-
-
     });
 
     Route::controller(familyMemberController::class)->group(function (){
@@ -182,4 +180,9 @@ Route::controller(lookUpDataController::class)->group(function () {
     Route::post('apply-integrity', 'applyIntegrity');
     Route::post('NIDA-Verifier', 'NIDAVerifier');
     Route::post('updateUser', 'updateUser');
+});
+
+
+Route::controller(userDeclarationController::class)->group(function (){
+    Route::post('declaration/preview-no-auth', 'previewAdfNoAuth');
 });

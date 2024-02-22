@@ -73,7 +73,7 @@ class User extends Authenticatable
         'kijiji_mtaa_shehia_current',
         'village_id',
         'village_string',
-	   
+
     ];
 
     /**
@@ -96,7 +96,10 @@ class User extends Authenticatable
     ];
 
 
-    
+    public function getFullNameAttribute()
+    {
+        return $this->first_name . ' ' . $this->middle_name . ' ' . $this->last_name;
+    }
 
     public function councils()
     {

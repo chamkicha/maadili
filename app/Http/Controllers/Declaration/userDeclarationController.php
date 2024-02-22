@@ -1411,8 +1411,8 @@ class userDeclarationController extends Controller
 
 
 
-        $declaration->pl_empty_sections = $this->pl_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id);
-        $declaration->member_empty_sections = $this->member_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id);
+        $declaration->pl_empty_sections = $this->pl_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id,auth()->user()->id);
+        $declaration->member_empty_sections = $this->member_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id,auth()->user()->id);
         // dd($member_empty_sections);
 
         foreach ($declaration->declaration_type->sections as $section) {
@@ -1485,7 +1485,130 @@ class userDeclarationController extends Controller
         return response()->json($response, 200);
     }
 
-    public function pl_empty_sections($sections,$declaration_id){
+    public function previewAdfNoAuth(Request $request)
+    {
+        $year = Financial_year::where('is_active', '=', 1)->first();
+          $declaration = User_declaration::with([
+            'declaration_type' => function ($query) {
+                $query->with([
+                    'sections' => function ($qry) {
+                        // $qry->select('*');
+                        $qry->orderBy('section_flow', 'asc');
+                        $qry->where('sections.status_id','1');
+                    }
+                ]);
+            },
+            'user' => function ($query) {
+
+                $query->leftjoin('marital_statuses','marital_statuses.id','=','users.marital_status_id');
+                $query->leftjoin('hadhi','hadhi.id','=','users.hadhi_id');
+                $query->leftjoin('sexes','sexes.id','=','users.sex_id');
+
+                $query->leftjoin('countries AS current_country', function ($join) {
+                    $join->on('current_country.id', '=', DB::raw('CAST(users.country_current AS bigint)'));
+                });
+                $query->leftjoin('wards', function ($join) {
+                    $join->on('wards.id', '=', DB::raw('CAST(users.ward_current AS bigint)'));
+                });
+                $query->leftjoin('districts', function ($join) {
+                    $join->on('districts.id', '=', DB::raw('CAST(users.district_current AS bigint)'));
+                });
+                $query->leftjoin('regions', function ($join) {
+                    $join->on('regions.id', '=', DB::raw('CAST(users.region_current AS bigint)'));
+                });
+                $query->leftjoin('villages', function ($join) {
+                    $join->on('villages.id', '=', DB::raw('CAST(users.village_id AS bigint)'));
+                });
+                $query->select('users.*','marital_statuses.marital_sw as marital_name','hadhi.hadhi_name','sexes.sex as sex_name',
+                               'wards.ward_name as ward_current_name','districts.district_name as district_current_name','regions.region_name as region_current_name',
+                               'current_country.country AS country_current_name','villages.name as village_current_name');
+            },
+        ])
+            ->where('id','=', $request->user_declaration_id)
+            ->where('is_deleted', '=', false)
+            ->first();
+        if ($declaration == null){
+            $response = ['statusCode' => 400, 'message' => "Auna data yeyote ambayo umejaza kwenye tamko hili,tafadhali jaza kwanza taarifa ili uweze kupata taarifa husika la tamko lako"];
+            return response()->json($response, 200);
+        }
+
+
+
+        $declaration->pl_empty_sections = $this->pl_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id,$request->user_id);
+        $declaration->member_empty_sections = $this->member_empty_sections($declaration->declaration_type->sections,$request->user_declaration_id,$request->user_id);
+        // dd($member_empty_sections);
+
+        foreach ($declaration->declaration_type->sections as $section) {
+            // return  $section->table_name;
+            $data = DB::table(strtolower($section->table_name))
+            ->where('user_declaration_id', $declaration->id)
+            ->where('is_deleted', '1')
+            ->get()
+            ->map(function ($item) {
+                if ($item->is_pl == 0) {
+                    $members = Family_member::join('family_member_types','family_member_types.id','=','family_members.family_member_type_id')
+                             ->where('family_members.status_id','=',1)
+                             ->where('family_members.id','=',$item->member_id)
+                             ->select('family_member_types.member_sw','family_members.*')
+                             ->first();
+
+                             if($members){
+                                $item->member_type = $members->member_sw;
+                                $item->member_first_name = $members->first_name;
+                                $item->member_middle_name = $members->middle_name;
+                                $item->member_last_name = $members->last_name;
+
+                             }else{
+                                $item->member_type = null;
+                             }
+                }else{
+                    $item->member_type = "pl";
+                }
+                return $item;
+            });
+
+           $requirements = DB::table('requirements')
+                ->join('section_requirements','requirements.id','=','section_requirements.requirement_id')
+                ->join('sections','section_requirements.section_id','=','sections.id')
+                ->where('sections.table_name','=',$section->table_name)
+                ->select('requirements.id','requirements.label','requirements.field_name','requirements.field_type')
+                ->orderBy('section_requirements.requirement_flow', 'asc')
+                ->get();
+
+
+            $section->section_data= $data;
+            $section->requirements = $requirements;
+        }
+        $taarifa_za_ajira = Sectiontaarafa478::where('user_id',$request->user_id)
+                                              ->with('kata_sasa_name')
+                                              ->with('wilaya_sasa_name')
+                                              ->with('mkoa_sasa_name')
+                                              ->with('userDeclaration')
+                                              ->with('mwaajiri')
+                                              ->with('ainaya_ajira')
+                                              ->with('marital_status')
+                                              ->with('title_name')
+                                              ->with('councils')
+                                              ->with('village')
+                                              ->with('country')
+                                              ->orderBy('id', 'desc')
+                                              ->first();
+
+        $password = Declaration_download::where('user_declaration_id',$declaration->id)->orderByDesc('id')->first();
+
+        if($password){
+
+            $password = $password->password;
+        }else{
+            $password = null;
+
+        }
+
+        $response = ['statusCode' => 200, 'declaration' => $declaration, 'taarifa_za_ajira' => $taarifa_za_ajira, 'year' => $year->year, 'password' => $password];
+        return response()->json($response, 200);
+    }
+
+    public function pl_empty_sections($sections,$declaration_id,$user_id){
 
 
             $pl_empty_sections = [];
@@ -1493,7 +1616,7 @@ class userDeclarationController extends Controller
                 foreach($sections as $section){
                     $empty_sections_check = DB::table(strtolower($section->table_name))
                             ->where('user_declaration_id', $declaration_id)
-                            ->where('member_id', auth()->user()->id)
+                            ->where('member_id', $user_id)
                             ->where('is_deleted','1')
                             ->first();
 
@@ -1510,9 +1633,9 @@ class userDeclarationController extends Controller
 
     }
 
-    public function member_empty_sections($sections,$declaration_id){
+    public function member_empty_sections($sections,$declaration_id,$user_id){
         $family_members = Family_member::with(['member_type'])
-            ->where('user_id','=',auth()->user()->id)
+            ->where('user_id','=',$user_id)
             ->where('status_id','=',1)
             ->get();
             // dd($family_members);
