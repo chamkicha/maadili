@@ -49,7 +49,7 @@ class KiongoziController extends Controller
         }
 
    $user = User::where('id','=',auth()->user()->id)->first();
-   $file_number = $this->file_number(file_number);
+   $file_number = $this->file_number($request);
 
     $isactive=true;
    $kiongozi = Sectiontaarafa478::updateOrCreate([
@@ -96,7 +96,7 @@ return response()->json($response);
         $response =  ['statusCode' => 200, 'ajira' => $kiongozi ];
         return response()->json($response);
     }
-    
+
     public function updateAjiraTaarifa(Request $request ,$token)
     {
         $validator = Validator::make($request->all(),[
