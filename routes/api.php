@@ -51,10 +51,15 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('update/declaration/section/{id?}', 'updateSection');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::post('declaration/preview', 'previewAdf');
+        Route::post('declaration/previewAdfReturned', 'previewAdfReturned');
         Route::post('declaration/confirmation', 'confirmDeclarationPreview');
+        Route::post('declaration/confirmationReturned', 'confirmDeclarationPreviewReturned');
+
         Route::post('delete/declaration', 'deleteDeclaration');
         Route::post('declaration/receipt', 'getDeclarationReceipt');
         Route::post('declaration/download', 'downloadAdf');
+        Route::post('declaration/downloadReturned', 'downloadAdfReturned');
+
         Route::get('declaration/history', 'ADFDownloadHistory');
         Route::post('declaration/user-declaration/create', 'DeclarationCreate');
         Route::post('declaration/createNyogezaPunguzoDeclaration', 'DeclarationCreateNyongezaPunguzo');
