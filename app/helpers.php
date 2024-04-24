@@ -14,8 +14,15 @@ use App\Models\Title;
 if (!function_exists('externalURL')) {
     function externalURL(){
 
-        // $URL = 'http://41.59.227.219:8089/api/';
-        $URL = 'http://api.maadili.go.tz:9003/';
+        $environment = env('APP_ENV');
+
+        if ($environment === 'local') {
+            $URL = 'http://41.59.227.219:8089/api/';
+
+        } else {
+            $URL = 'http://api.maadili.go.tz:9003/';
+
+        }
 
         return $URL;
     }
@@ -31,6 +38,7 @@ if (!function_exists('nidaURL')) {
         return $URL;
     }
 }
+
 
 if (!function_exists('file_number')) {
     function file_number($request){

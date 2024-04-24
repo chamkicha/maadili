@@ -329,6 +329,7 @@ class userDeclarationController extends Controller
     }
 
     public function Returneddeclaration(){
+
         $declarations = User_declaration::with(['declaration_type.sections'])
             // ->where('user_id','=', '6681')
             ->where('user_id','=', auth()->user()->id)
@@ -358,6 +359,8 @@ class userDeclarationController extends Controller
 
                   $data = DB::table(strtolower($section->table_name))
                     ->where('user_declaration_id', $declaration->id)
+                    ->where('member_id',auth()->user()->id)
+                    ->whereIn('pl_status', [1, 2])
                     ->get()
                     ->map(function ($item) {
                         if ($item->is_pl == 0) {
@@ -396,7 +399,10 @@ class userDeclarationController extends Controller
 
             }
 
+
+
             $response = ['statusCode' => 200, 'message' => 'Matamko/Tamko yaliyorudishwa' , 'declarations' => $declarations];
+            Log::info($data);
             return response()->json($response, 200);
 
 
@@ -1139,7 +1145,7 @@ class userDeclarationController extends Controller
 
     public function updateReturnedSectionData(Request $request)
     {
-        // Log::debug($request);
+        Log::info($request);
 
         $validator = Validator::make($request->all(), [
             'table' => 'required|string',
@@ -1181,6 +1187,7 @@ class userDeclarationController extends Controller
                     'table' => $table,
                     'data' => $update
                    ];
+        Log::info(json_encode($response));
 
         return response()->json($response);
 
@@ -1199,7 +1206,7 @@ class userDeclarationController extends Controller
 
     public function returnedDeclarationSubmission(Request $request): JsonResponse
     {
-        Log::debug($request);
+        // Log::debug($request);
 
 	 $validator = Validator::make($request->all(), [
             'user_declaration_id' => 'required|integer',
@@ -1545,7 +1552,7 @@ class userDeclarationController extends Controller
             $data = DB::table(strtolower($section->table_name))
             ->where('user_declaration_id', $declaration->id)
             ->where('is_deleted', '1')
-            ->where('pl_status', '2')
+            ->whereIn('pl_status', ['1', '2'])
             ->get()
             ->map(function ($item) {
                 if ($item->is_pl == 0) {
@@ -2087,7 +2094,7 @@ class userDeclarationController extends Controller
             // return  $section->table_name;
             $data = DB::table(strtolower($section->table_name))
             ->where('user_declaration_id', $declaration->id)
-            ->where('pl_status', '2')
+            ->whereIn('pl_status', ['1', '2'])
             ->get()
             ->map(function ($item) {
                 if ($item->is_pl == 0) {

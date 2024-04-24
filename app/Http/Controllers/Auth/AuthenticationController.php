@@ -64,6 +64,7 @@ class AuthenticationController extends Controller
             $this->checkTooManyFailedAttempts();
 
             if (!Auth::attempt($request->only($user_name, 'password'))) {
+                RateLimiter::hit($this->throttleKey());
                 return response()
                     ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $user_name . ' hyo ayupo kwenye mfumo'], 401);
             }
@@ -88,7 +89,7 @@ class AuthenticationController extends Controller
         } catch (Exception $error) {
             return response()->json([
                 'statusCode' => 402,
-                'message' => 'Error occurred while logging in.',
+                'message' => 'Error occurred while logging in.'.$error->getMessage(),
                 'error' => $error,
             ]);
         }
@@ -150,12 +151,13 @@ class AuthenticationController extends Controller
      * @return void
      * @throws Exception
      */
-    public function checkTooManyFailedAttempts(): void
+    public function checkTooManyFailedAttempts()
     {
         if (!RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
             return;
-        }
+        }else{
 
-        throw new ValidationException('IP address banned. Too many login attempts.');
+        return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 401);
+        }
     }
 }

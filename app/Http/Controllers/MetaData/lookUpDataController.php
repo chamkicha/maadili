@@ -98,8 +98,8 @@ class lookUpDataController extends Controller
     }
 
     public function applyIntegrity(Request $request){
-        
-        
+
+
 
         $URL  = externalURL().'apply-integrity';
         try{
@@ -108,7 +108,7 @@ class lookUpDataController extends Controller
         Log::info('applyIntegrity - '.$result);
         $result = json_decode($result);
 
-        
+
         return response()->json($result);
 
         }catch (Exception $error) {
@@ -144,7 +144,7 @@ class lookUpDataController extends Controller
 
     public function updateUser(Request $request){
 
-        $URL  = nidaURL().'updateUser';
+        $URL  = externalURL().'updateUser';
         try{
         $data = $request->all();
         $result = Http::post($URL, $data);

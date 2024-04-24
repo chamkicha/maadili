@@ -51,6 +51,7 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('update/declaration/section/{id?}', 'updateSection');
         Route::post('submit/declaration', 'declarationSubmission');
         Route::post('declaration/preview', 'previewAdf');
+
         Route::post('declaration/previewAdfReturned', 'previewAdfReturned');
         Route::post('declaration/confirmation', 'confirmDeclarationPreview');
         Route::post('declaration/confirmationReturned', 'confirmDeclarationPreviewReturned');
