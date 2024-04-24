@@ -57,7 +57,7 @@ class BinafsiController extends Controller
         $kiongozi ->passport = $request->input('passport');
         $kiongozi ->profile_picture = $request->input('profile_picture');
         $kiongozi ->signature_image = $request->input('signature_image');
-        
+
         $kiongozi ->sex_id = $request->input('sex_id');
         $kiongozi ->marital_status_id = $request->input('marital_status_id');
         $kiongozi ->check_number = $request->input('check_number');
@@ -67,7 +67,8 @@ class BinafsiController extends Controller
         $kiongozi ->district_current = $request->input('district_current');
         $kiongozi ->region_current = $request->input('region_current');
         $kiongozi ->po_box_current = $request->input('po_box_current');
-        
+        $kiongozi ->zone_id = $request->input('zone_id');
+
         $kiongozi ->physical_address_current = $request->input('physical_address_current');
         $kiongozi ->country_current = $request->input('country_current');
         $kiongozi ->kijiji_mtaa_shehia = $request->input('kijiji_mtaa_shehia');

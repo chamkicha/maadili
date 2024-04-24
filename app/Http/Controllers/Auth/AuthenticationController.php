@@ -61,10 +61,17 @@ class AuthenticationController extends Controller
 
         try {
 
-            $this->checkTooManyFailedAttempts();
+            $attempts = $this->checkTooManyFailedAttempts();
+
+            if($attempts){
+              return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 401);
+
+            }
 
             if (!Auth::attempt($request->only($user_name, 'password'))) {
                 RateLimiter::hit($this->throttleKey());
+
+
                 return response()
                     ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $user_name . ' hyo ayupo kwenye mfumo'], 401);
             }
@@ -153,11 +160,17 @@ class AuthenticationController extends Controller
      */
     public function checkTooManyFailedAttempts()
     {
-        if (!RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
-            return;
-        }else{
 
-        return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 401);
+        // $attempts = RateLimiter::attempts($this->throttleKey());
+        // Log the number of attempts
+        // \Log::info('Login attempts for ' . $this->throttleKey() . ': ' . $attempts);
+
+        if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
+            $remainingSeconds = RateLimiter::availableIn($this->throttleKey());
+            return true;
+        }else{
+            return false;
+
         }
     }
 }
