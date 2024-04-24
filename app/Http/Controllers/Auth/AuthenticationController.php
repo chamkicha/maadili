@@ -166,7 +166,12 @@ class AuthenticationController extends Controller
         // \Log::info('Login attempts for ' . $this->throttleKey() . ': ' . $attempts);
 
         if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
-            $remainingSeconds = RateLimiter::availableIn($this->throttleKey());
+
+            $throttleKey = $this->throttleKey();
+            $remainingSeconds = RateLimiter::availableIn($throttleKey);
+
+            $remainingSecondsFor5Minutes = 300 - $remainingSeconds;
+
             return true;
         }else{
             return false;
