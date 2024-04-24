@@ -73,7 +73,7 @@ class AuthenticationController extends Controller
 
 
                 return response()
-                    ->json(['statusCode' => 401, 'message' => 'Unauthorized, mtumiaji mwenye ' . $user_name . ' hyo ayupo kwenye mfumo'], 401);
+                    ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji/nywila haviko sawa'], 401);
             }
 
             RateLimiter::clear($this->throttleKey());
