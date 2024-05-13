@@ -33,6 +33,7 @@ class BinafsiController extends Controller
     public function update(Request $request ,$id)
     {
 
+        Log::info($request);
         $kiongozi = User::find($id);
         $kiongozi ->first_name = $request->input('first_name');
         $kiongozi ->middle_name = $request->input('middle_name');

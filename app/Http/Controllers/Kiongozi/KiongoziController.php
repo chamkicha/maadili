@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Zone;
 use App\Models\Office;
 use App\Models\Title;
+use App\Models\Region;
 use DB;
 use Illuminate\Support\Facades\Log;
 
@@ -112,6 +113,16 @@ return response()->json($response);
         }
     $user = User::where('id','=',auth()->user()->id)->first();
 
+    if($request->mkoa_sasa){
+        $kanda = Region::where('id',$request->mkoa_sasa)->first();
+        $zone_id = $kanda->zone_id;
+    }else{
+        $zone_id = $user->zone_id;
+    }
+
+
+    Log::info('Before zone - '.$user->zone_id.' After Zone - '.$zone_id);
+
 
     $file_number = $this->file_number($request);
 
@@ -145,6 +156,7 @@ return response()->json($response);
     //    }
        $user->file_number= $file_number;
        $user->title_id= $kiongozi->title_id;
+       $user->zone_id = $zone_id;
        $user->save();
        $kiongozi->save();
 
