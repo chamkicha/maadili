@@ -1,7 +1,9 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
+use App\Models\User;
+use App\Models\Region;
 use App\Models\Sectiontaarafa478;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -17,6 +19,30 @@ use App\Models\Sectiontaarafa478;
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+
+Route::get('/maadili', function () {
+    $users  = Sectiontaarafa478::with('userDetails')->get();
+    foreach($users as $value){
+
+        $kanda = Region::where('id',$value->mkoa_sasa)->first();
+        if($kanda){
+
+        $zone_id = $kanda->zone_id;
+
+        if($value->userDetails){
+            $user = User::where('id','=',$value->userDetails->id)->first();
+            $user->zone_id = $zone_id;
+            $user->save();
+        }
+        }
+
+    }
+
+    return '$user';
+});
+
 
 
 

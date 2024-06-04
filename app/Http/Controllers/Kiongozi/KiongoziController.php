@@ -121,9 +121,6 @@ return response()->json($response);
     }
 
 
-    Log::info('Before zone - '.$user->zone_id.' After Zone - '.$zone_id);
-
-
     $file_number = $this->file_number($request);
 
        $isactive=true;

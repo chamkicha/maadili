@@ -142,6 +142,11 @@ class User extends Authenticatable
         return $this->BelongsTo(Sex::class,'sex_id','id');
     }
 
+    public function Sectiontaarafa()
+    {
+        return $this->BelongsTo(Sectiontaarafa478::class,'id','user_id');
+    }
+
     public function countryBirthInfo()
     {
         return $this->BelongsTo(Country::class,'country_birth','id');
