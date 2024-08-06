@@ -34,6 +34,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Sectiontaarafa478;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 
 class lookUpDataController extends Controller

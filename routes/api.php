@@ -97,6 +97,8 @@ Route::middleware('auth:sanctum')->group( function () {
         Route::post('update-user/{id?}', 'update');
         Route::post('taarifa-binafsi', 'nida');
         Route::get('taarifa', 'getUser');
+        Route::post('updateUser', 'updateUser');
+
     });
 
   Route::controller(rejestaZawadiController::class)->group(function () {
@@ -145,7 +147,7 @@ Route::middleware('auth:sanctum')->group( function () {
     Route::get('villages/{ward_id?}', 'villages');
     Route::get('get_selected_date', 'get_selected_date');
 
-});
+ });
 
 });
 
@@ -185,7 +187,7 @@ Route::controller(lookUpDataController::class)->group(function () {
     // Route::post('MyListIntegrityPledge', 'MyListIntegrityPledge');
     Route::post('apply-integrity', 'applyIntegrity');
     Route::post('NIDA-Verifier', 'NIDAVerifier');
-    Route::post('updateUser', 'updateUser');
+    // Route::post('updateUser', 'updateUser');
 });
 
 

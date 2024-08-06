@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
+use Exception;
 
 class BinafsiController extends Controller
 {
@@ -21,7 +22,65 @@ class BinafsiController extends Controller
         ->where('id','=',auth()->user()->id)->first();
         $response =  ['statusCode' => 200, 'kiongozi' => $kiongozi ];
         return response()->json($response);
-}
+    }
+
+    public function updateUser(Request $request)
+    {
+        Log::info('updateUser request:', $request->all());
+        try{
+
+
+            $formData = [
+                "first_name" => $request->input('first_name'),
+                "middle_name" => $request->input('middle_name'),
+                "last_name" => $request->input('last_name'),
+                "nationality" => $request->input('nationality'),
+                "date_of_birth" => $request->input('date_of_birth'),
+                "ward_nida" => $request->input('ward_nida'),
+                "region_nida" => $request->input('region_nida'),
+                "district_nida" => $request->input('district_nida'),
+                "village_nida" => $request->input('village_nida'),
+                "house_no" => $request->input('house_no'),
+                "profile_picture" => $request->input('profile_picture'),
+                "sex" => $request->input('sex'),
+                "signature_image" => $request->input('signature_image'),
+                "nida" => $request->input('nida'),
+                "user_id" => $request->input('user_id'),
+                "country_birth" => $request->input('country_birth')
+            ];
+
+            $user = User::find($request->user_id);
+
+            if ($user) {
+                $user->update($formData);
+
+                $kiongozi = User::with('zone', 'marital', 'hadhi', 'councils', 'village', 'sex', 'countryCurrentInfo', 'countryBirthInfo', 'districtCurrentInfo', 'regionCurrentInfo', 'wardCurrentInfo')
+                    ->where('id', $request->user_id)
+                    ->first();
+
+                return response()->json([
+                    'success' => 200,
+                    'message' => 'User updated successfully',
+                    'user' => $kiongozi
+                ]);
+            }
+
+            return response()->json([
+                'statusCode' => 201,
+                'message' => 'User not found'
+            ]);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went Wrong',
+                'error' => $error->getMessage(),
+            ]);
+        }
+
+    }
+
+
 
       public function edit($id)
     {
