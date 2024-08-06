@@ -51,6 +51,9 @@ class BinafsiController extends Controller
 
             $user = User::find($request->user_id);
 
+            Log::info('AFTER updateUser request:', ['user' => $user]);
+
+
             if ($user) {
                 $user->update($formData);
 
