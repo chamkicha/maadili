@@ -51,7 +51,7 @@ class AuthenticationController extends Controller
         else{
 
             return response()
-                ->json(['statusCode' => 401, 'message' => 'Username ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza username sahihi.'], 401);
+                ->json(['statusCode' => 401, 'message' => 'Username ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza username sahihi.'], 200);
         }
 
         $request->merge([
@@ -64,7 +64,7 @@ class AuthenticationController extends Controller
             $attempts = $this->checkTooManyFailedAttempts();
 
             if($attempts){
-              return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 401);
+              return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 200);
 
             }
 
@@ -73,7 +73,7 @@ class AuthenticationController extends Controller
 
 
                 return response()
-                    ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji/nywila haviko sawa'], 401);
+                    ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji/nywila haviko sawa'], 200);
             }
 
             RateLimiter::clear($this->throttleKey());

@@ -1282,9 +1282,9 @@ class userDeclarationController extends Controller
 
     public function declarationSubmission(Request $request): JsonResponse
     {
-        // Log::debug($request);
+        Log::debug('Declaration Submission Request', ['request' => $request->all()]);
 
-	 $validator = Validator::make($request->all(), [
+	    $validator = Validator::make($request->all(), [
             'user_declaration_id' => 'required|integer',
             'flag' => 'required|string',
             'is_late'  => 'required',
@@ -1299,18 +1299,50 @@ class userDeclarationController extends Controller
             ]);
         }
 
+        try{
+
+
         // $declaration = Declaration_type::find($request->input('declaration_type'));
         $today = Carbon::now();
 
         $year = Financial_year::where('is_active', '=', true)->first();
 
-        $data = User_declaration::where('id', '=', $request->user_declaration_id)->first();
-        // dd($data);
+        $data = User_declaration::with('declaration_type')->where('id', '=', $request->user_declaration_id)->first();
 
         if ($data) {
             // $data->update([
             //     'flag' => $request->input('flag')
             // ]);
+            // dd($data->declaration_type);
+
+            if($data->declaration_type->pledge_required == 1){
+
+                $integrity_pledge = integrity_pledge::with('user','title')->whereIn('approval_status',['RECEIVED'])
+                                ->where('user_id',auth()->user()->id)
+                                ->latest('id')
+                                ->first();
+
+                    if($integrity_pledge){
+
+                        if($integrity_pledge->title_id != $integrity_pledge->user->title_id){
+
+                            $response = [
+                                'statusCode' => 401,
+                                'message' => 'Ndugu kiongozi, Tafadhali jaza kwanza ahadi ya uadilifu ndio uendelee kutuma tamko',
+                            ];
+                            return response()->json($response);
+                        }
+
+                    }else{
+
+                        $response = [
+                            'statusCode' => 401,
+                            'message' => 'Ndugu kiongozi, Tafadhali jaza kwanza ahadi ya uadilifu ndio uendelee kutuma tamko',
+                        ];
+                        return response()->json($response);
+
+                    }
+            }
 
             $data->flag = $request->input('flag');
             $data->is_late = $request->input('is_late');
@@ -1342,6 +1374,14 @@ class userDeclarationController extends Controller
         }
 
         return response()->json($response);
+
+        }catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'something went wrong ',
+                'error' => $error->getMessage(),
+            ]);
+        }
     }
 
     public function base64_to_file($base64_attachment,$folder){

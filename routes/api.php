@@ -1,16 +1,17 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthenticationController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\govesbController;
 use App\Http\Controllers\Kiongozi\BinafsiController;
 use App\Http\Controllers\Kiongozi\KiongoziController;
+use App\Http\Controllers\Auth\AuthenticationController;
+use App\Http\Controllers\Auth\forgotPasswordController;
 use App\Http\Controllers\Auth\passwordUpdateController;
-use App\Http\Controllers\Declaration\userDeclarationController;
 use App\Http\Controllers\Family\familyMemberController;
 use App\Http\Controllers\MetaData\lookUpDataController;
 use App\Http\Controllers\Notification\notificationController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Auth\forgotPasswordController;
+use App\Http\Controllers\Declaration\userDeclarationController;
 use App\Http\Controllers\RejestaZawadi\rejestaZawadiController;
 use App\Http\Controllers\IntegrityPledge\IntegrityPledgeController;
 
@@ -193,4 +194,18 @@ Route::controller(lookUpDataController::class)->group(function () {
 
 Route::controller(userDeclarationController::class)->group(function (){
     Route::post('declaration/preview-no-auth', 'previewAdfNoAuth');
+});
+
+
+
+
+Route::group(['prefix' => 'govesb'], function(){
+    Route::post('exchange-rate', [govesbController::class,'exchangeRate']);
+    Route::post('brela', [govesbController::class,'brela']);
+    Route::post('napa-normal-request', [govesbController::class,'NapaNormalRequest']);
+    Route::post('napa-hirearchy-request', [govesbController::class,'NapaHirearchyRequest']);
+    Route::post('OTRMIS-normal-request', [govesbController::class,'OTRMISNormalRequest']);
+    Route::post('HCMIS-employees-request', [govesbController::class,'HCMISEmployeesRequest']);
+
+
 });

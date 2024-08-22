@@ -26,6 +26,15 @@ class BinafsiController extends Controller
 
     public function updateUser(Request $request)
     {
+        $kiongozi = User::where('nida','=',$request->input('nida'))->first();
+        
+        if($kiongozi){
+            return response()->json([
+                'statusCode' => 401,
+                'message' => 'Ndugu kiongozi namba yako ya NIDA imeshatumika kwenye mfumo'
+            ]);
+        }
+
         Log::info('updateUser request:', $request->all());
         try{
 
