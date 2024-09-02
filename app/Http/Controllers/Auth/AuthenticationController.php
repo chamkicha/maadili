@@ -51,7 +51,7 @@ class AuthenticationController extends Controller
         else{
 
             return response()
-                ->json(['statusCode' => 401, 'message' => 'Username ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza username sahihi.'], 200);
+                ->json(['statusCode' => 401, 'message' => 'Taarifa iliyoingizwa si sahihi, tafadhali ingiza taarifa sahihi.'], 200);
         }
 
         $request->merge([

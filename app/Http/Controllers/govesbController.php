@@ -65,6 +65,7 @@ class govesbController extends Controller
 
         $validator = Validator::make($request->all(), [
             'RegistrationNumber' =>  ['required','integer'],
+            'EntityType' =>  ['required'],
         ]);
 
         if ($validator->fails()) {
@@ -84,7 +85,62 @@ class govesbController extends Controller
                 'requestdata' => [
                     "RegistrationNumber" => (int)$request->RegistrationNumber,
                     "ApiKey" => "TEST-400c0a84-da97-46a8-b93cbcabnmz",
-                    "EntityType" => 1
+                    "EntityType" => $request->EntityType
+                ]
+            ];
+
+            $helper = new EsbHelper();
+            $esbResponse = $helper->requestData($apiCode, $payload, "json");
+
+            if($esbResponse['success']){
+                return response()->json([
+                    'statusCode' => 400,
+                    'message' => 'Success',
+                    'data' => $esbResponse['esbBody'],
+                ]);
+            }else{
+                return response()->json([
+                    'statusCode' => 401,
+                    'message' => $esbResponse['message'],
+                ]);
+
+            }
+
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Something went wrong.',
+                'error' => $error,
+            ]);
+        }
+    }
+
+    public function brelaListCompaniesBusinessByNIN(Request $request)
+    {
+        Log::info("brelaRequest - " . json_encode($request->all()));
+
+        $validator = Validator::make($request->all(), [
+            'NIN' =>  ['required'],
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'statusCode' => 401,
+                'message' => 'validation error',
+                'fields' => $validator->errors(),
+                'error' => true,
+            ]);
+        }
+
+        try{
+
+            $apiCode = "OniQ3ahV";
+
+            $payload = [
+                'ninrequestdata' => [
+                    "NIN" => $request->NIN,
+                    "ApiKey" => "TEST-400c0a84-da97-46a8-b93cbcabnmz"
                 ]
             ];
 
@@ -300,7 +356,12 @@ class govesbController extends Controller
         }
 
         try{
-        $apiCode = "n2hyG8i1";
+        if (env('APP_ENV') === 'production') {
+        $apiCode = "JTVDQUuj";
+        }
+        else{
+            $apiCode = "n2hyG8i1";
+        }
         $payload = [
             "page_size" => (int)$request->page_size,
             "page_number" => (int)$request->page_number,

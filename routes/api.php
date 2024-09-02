@@ -202,6 +202,7 @@ Route::controller(userDeclarationController::class)->group(function (){
 Route::group(['prefix' => 'govesb'], function(){
     Route::post('exchange-rate', [govesbController::class,'exchangeRate']);
     Route::post('brela', [govesbController::class,'brela']);
+    Route::post('brela-list-companies-business-by-NIN', [govesbController::class,'brelaListCompaniesBusinessByNIN']);
     Route::post('napa-normal-request', [govesbController::class,'NapaNormalRequest']);
     Route::post('napa-hirearchy-request', [govesbController::class,'NapaHirearchyRequest']);
     Route::post('OTRMIS-normal-request', [govesbController::class,'OTRMISNormalRequest']);
