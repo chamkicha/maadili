@@ -39,17 +39,19 @@ use Exception;
 
 class lookUpDataController extends Controller
 {
-    // public function get_api($endpoint,$values = ''){
+    // public function get_api($endpoint,$values = ''){  http://api.maadili.go.tz:9003/emis/countries
     public function get_api($end_point, $value = null){
 
         if($value){
-            $URL  = 'http://api.maadili.go.tz:9003/emis/'.$end_point.'/'.$value;
+            $URL  = 'http://41.59.227.219:9003/emis/'.$end_point.'/'.$value;
         }else{
-            $URL  = 'http://api.maadili.go.tz:9003/emis/'.$end_point;
+            $URL  = 'http://41.59.227.219:9003/emis/'.$end_point;
         }
         try{
         $result  =  Http::get($URL);
+
         $result = json_decode($result);
+        // dd($URL);
         return response()->json($result);
 
         }catch (Exception $error) {
