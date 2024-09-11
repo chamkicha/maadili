@@ -24,9 +24,11 @@ class AuthenticationController extends Controller
      * @throws ValidationException
      * @throws Exception
      */
-    public function login(Request $request): JsonResponse
+
+
+     public function login(Request $request): JsonResponse
     {
-        // dd(DB::table('users')->get());
+        // Input validation
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
@@ -36,72 +38,73 @@ class AuthenticationController extends Controller
             return response()->json($validator->errors());
         }
 
+        // Determine login type based on input
         $login_type = filter_var($request->input('username'), FILTER_SANITIZE_NUMBER_INT);
-
-
         $phone_to_check = str_replace("-", "", $login_type);
 
         if (strlen($phone_to_check) >= 9 && strlen($phone_to_check) <= 13) {
-
             $user_name =  "phone_number";
         } elseif (strlen($phone_to_check) > 13) {
-
             $user_name = "nida";
-        }
-        else{
-
-            return response()
-                ->json(['statusCode' => 401, 'message' => 'Taarifa iliyoingizwa si sahihi, tafadhali ingiza taarifa sahihi.'], 200);
+        } else {
+            return response()->json([
+                'statusCode' => 401,
+                'message' => 'Taarifa iliyoingizwa si sahihi, tafadhali ingiza taarifa sahihi.'
+            ], 200);
         }
 
         $request->merge([
             $user_name => $request->input('username')
         ]);
-        // Log::debug($request);
 
         try {
-
-            $attempts = $this->checkTooManyFailedAttempts();
-
-            if($attempts){
-              return response()->json(['statusCode' => 401, 'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'], 200);
-
+            // Check if the user has attempted too many times
+            if ($this->checkTooManyFailedAttempts()) {
+                return response()->json([
+                    'statusCode' => 401,
+                    'message' => 'Ndugu kiongozi, umejaribu mara nyingi sana. Tafadhali jaribu tena baadaye.'
+                ], 200);
             }
 
+            // Attempt login
             if (!Auth::attempt($request->only($user_name, 'password'))) {
-                RateLimiter::hit($this->throttleKey());
+                // Hit rate limiter on failed attempt
+                RateLimiter::hit($this->throttleKey(), 300); // Throttle for 5 minutes (300 seconds)
 
-
-                return response()
-                    ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji/nywila haviko sawa'], 200);
+                return response()->json([
+                    'statusCode' => 401,
+                    'message' => 'Jina la mtumiaji/nywila haviko sawa'
+                ], 200);
             }
 
+            // Clear rate limiter on successful login
             RateLimiter::clear($this->throttleKey());
 
+            // Fetch user details and return token
             $user = User::withCount('declarations')->with('Sectiontaarafa.title_name')
                 ->where('nida', $request->username)
                 ->orWhere('phone_number', $request->username)
                 ->firstOrFail();
 
-            //        if ($user->verified_at == null){
-            //
-            //            return response()->json(['statusCode' => 401, 'message' => 'Samahani hakiki barua pepe yako ili uweze kuendelea'], 401);
-            //        }
-
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return response()
-                ->json(['statusCode' => 200, 'message' => 'Hi ' . $user->first_name . ' ' . $user->middle_name . ' ' . $user->last_name . ', karibu kwenye ODS', 'user' => $user, 'access_token' => $token, 'token_type' => 'Bearer',]);
+            return response()->json([
+                'statusCode' => 200,
+                'message' => 'Hi ' . $user->first_name . ' ' . $user->middle_name . ' ' . $user->last_name . ', karibu kwenye ODS',
+                'user' => $user,
+                'access_token' => $token,
+                'token_type' => 'Bearer',
+            ]);
 
         } catch (Exception $error) {
             return response()->json([
                 'statusCode' => 402,
-                'message' => 'Error occurred while logging in.'.$error->getMessage(),
+                'message' => 'Error occurred while logging in: ' . $error->getMessage(),
                 'error' => $error,
             ]);
         }
-
     }
+
 
     public function verifyEmail($token): string
     {
@@ -147,9 +150,10 @@ class AuthenticationController extends Controller
      *
      * @return string
      */
-    public function throttleKey(): string
+
+    protected function throttleKey()
     {
-        return Str::lower(request('username')) . '|' . request()->ip();
+        return strtolower(request()->input('username')) . '|' . request()->ip();
     }
 
     /**
@@ -160,22 +164,14 @@ class AuthenticationController extends Controller
      */
     public function checkTooManyFailedAttempts()
     {
+        $throttleKey = $this->throttleKey();
 
-        // $attempts = RateLimiter::attempts($this->throttleKey());
-        // Log the number of attempts
-        // \Log::info('Login attempts for ' . $this->throttleKey() . ': ' . $attempts);
-
-        if (RateLimiter::tooManyAttempts($this->throttleKey(), 3)) {
-
-            $throttleKey = $this->throttleKey();
-            $remainingSeconds = RateLimiter::availableIn($throttleKey);
-
-            $remainingSecondsFor5Minutes = 300 - $remainingSeconds;
-
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            // User has reached the maximum number of attempts (3)
             return true;
-        }else{
-            return false;
-
         }
+
+        return false;
     }
+
 }
