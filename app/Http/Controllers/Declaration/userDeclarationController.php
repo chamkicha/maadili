@@ -1517,7 +1517,11 @@ class userDeclarationController extends Controller
                                               ->with('village')
                                               ->with('country')
                                               ->orderBy('id', 'desc')
+                                            //   ->orderBy('created_at', 'desc')
                                               ->first();
+
+        $user = User::where('id',auth()->user()->id)->first()->title_id;
+                                            //   dd($taarifa_za_ajira);
 
         $password = Declaration_download::where('user_declaration_id',$declaration->id)->orderByDesc('id')->first();
 
