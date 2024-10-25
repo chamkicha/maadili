@@ -66,6 +66,7 @@ class AuthenticationController extends Controller
                 ], 200);
             }
 
+            
             // Attempt login
             if (!Auth::attempt($request->only($user_name, 'password'))) {
                 // Hit rate limiter on failed attempt

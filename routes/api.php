@@ -178,7 +178,7 @@ Route::middleware('auth:sanctum')->group( function () {
 
 Route::controller(notificationController::class)->group(function () {
     Route::get('notifications', 'showNotifications');
- Route::get('contacts', 'contacts');
+    Route::get('contacts', 'contacts');
     Route::get('instructions', 'instructions');
 });
 
