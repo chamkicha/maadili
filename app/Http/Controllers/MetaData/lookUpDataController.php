@@ -43,9 +43,9 @@ class lookUpDataController extends Controller
     public function get_api($end_point, $value = null){
 
         if($value){
-            $URL  = 'http://41.59.227.219:9003/emis/'.$end_point.'/'.$value;
+            $URL  = 'http://10.20.62.5:9003/emis/'.$end_point.'/'.$value;
         }else{
-            $URL  = 'http://41.59.227.219:9003/emis/'.$end_point;
+            $URL  = 'http://10.20.62.5:9003/emis/'.$end_point;
         }
         try{
         $result  =  Http::get($URL);
