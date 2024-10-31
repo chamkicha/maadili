@@ -57,11 +57,26 @@ class lookUpDataController extends Controller
         // }
 
         try{
+
+            $result = file_get_contents($URL);
+
+            $result = mb_convert_encoding($result, 'UTF-8', 'UTF-8');
+
+            $data = json_decode($result, true);
+
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                echo 'JSON Decode Error: ' . json_last_error_msg();
+                return null;
+            }
+
+            return response()->json($data);
+
         $result  =  Http::get($URL);
 
         $result = json_decode($result);
         // dd($URL);
         return response()->json($result);
+
 
         }catch (Exception $error) {
             return response()->json([
