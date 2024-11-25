@@ -22,6 +22,14 @@ class forgotPasswordController extends Controller
     public function sendResetPassword(Request $request)
     {
 
+        $validator = Validator::make($request->all(),[
+            'usernames' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
         $login_type = filter_var($request->input('username'), FILTER_SANITIZE_NUMBER_INT);
 
 
