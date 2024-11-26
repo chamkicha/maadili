@@ -53,35 +53,35 @@ class forgotPasswordController extends Controller
             $user_name => $request->input('username')
         ]);
 
-    try {
+        try {
 
-        // $this->checkTooManyFailedAttempts();
+            // $this->checkTooManyFailedAttempts();
 
-        $input = $request->only('username');
+            $input = $request->only('username');
 
-        $user = User::where($user_name,'=',$input)->first();
+            $user = User::where($user_name,'=',$input)->first();
 
-        if ($user == null){
+            if ($user == null){
 
-            $response = ['statusCode' => 400, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
-            return response()->json($response,200);
+                $response = ['statusCode' => 400, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
+                return response()->json($response,200);
+            }
+            $user->password = Hash::make(strtoupper($user->last_name));
+            $user->is_password_forget = true;
+            $user->save();
+
+            $this->sendMessage($user);
+
+            $response = ['statusCode' => 200,'message' => 'Ujumbe wa kubadilisha neno siri umetumwa kikamilifu kwenye namba yako ya simu'];
+            return response($response, 200);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Error occurred while Forget password.',
+                'error' => $error,
+            ]);
         }
-        $user->password = Hash::make(strtoupper($user->last_name));
-        $user->is_password_forget = true;
-        $user->save();
-
-        $this->sendMessage($user);
-
-        $response = ['statusCode' => 200,'message' => 'Ujumbe wa kubadilisha neno siri umetumwa kikamilifu kwenye namba yako ya simu'];
-        return response($response, 200);
-
-    } catch (Exception $error) {
-        return response()->json([
-            'statusCode' => 402,
-            'message' => 'Error occurred while Forget password.',
-            'error' => $error,
-        ]);
-    }
     }
 
     public function sendResetResponse(Request $request){
@@ -129,6 +129,78 @@ class forgotPasswordController extends Controller
         }
 
         throw new ValidationException('IP address banned. Too many Forget password attempts.');
+    }
+
+
+    public function sendOTP(Request $request)
+    {
+
+        $validator = Validator::make($request->all(),[
+            'username' => 'required',
+        ]);
+        if ($validator->fails()) {
+            return response()->json($validator->errors());
+        }
+
+
+        $login_type = filter_var($request->input('username'), FILTER_SANITIZE_NUMBER_INT);
+
+
+        $phone_to_check = str_replace("-", "", $login_type);
+
+
+        if (strlen($phone_to_check) >= 9 && strlen($phone_to_check) <= 13) {
+
+            $user_name =  "phone_number";
+        } elseif (strlen($phone_to_check) > 13) {
+
+            $user_name = "nida";
+        }
+        else{
+
+            return response()
+                ->json(['statusCode' => 401, 'message' => 'Jina la mtumiaji ambayo umeingiza sio namba ya simu na pia sio nida namba, tafadhali ingiza jina la mtumiaji sahihi.'], 401);
+        }
+
+        $request->merge([
+            $user_name => $request->input('username')
+        ]);
+
+        try {
+
+            $input = $request->only('username');
+
+            $user = User::where($user_name,'=',$input)->first();
+
+            if ($user == null){
+
+                $response = ['statusCode' => 400, 'message' => 'Namba ya simu au NIDA ulioingiza haipo kwenye mfumo, tafadhali ingiza ilio sahihi'];
+                return response()->json($response,200);
+            }
+
+            $otp = random_int(1000, 9999);
+            $phno = $user->phone_number;
+            // $phno = '255762807070';
+            $url = 'http://41.59.227.219:9003/emis/send-sms';
+            // $url = nidaURL();
+
+            $response = Http::asForm()->post($url, [
+                'message' => "Your OTP is: $otp",
+                'phoneNumber' => $phno,
+            ]);
+
+            // dd($response);
+
+            $response = ['statusCode' => 200,'message' => 'OTP','otp' => $otp];
+            return response($response, 200);
+
+        } catch (Exception $error) {
+            return response()->json([
+                'statusCode' => 402,
+                'message' => 'Error occurred while Forget password.',
+                'error' => $error,
+            ]);
+        }
     }
 
 }
