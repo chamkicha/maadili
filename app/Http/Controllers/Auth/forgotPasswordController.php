@@ -114,8 +114,9 @@ class forgotPasswordController extends Controller
 
     private function sendMessage($user) {
 
+        $url ='http://api.maadili.go.tz:9003/emis/send-sms';
         $message = "Ndugu kiongozi, ".$user->first_name.' '.$user->middle_name.' '.$user->last_name ." umefanikiwa kubadili nywila. Tafadhali tumia nywila: ".strtoupper($user->last_name)." kuingia kwenye mfumo.Taarifa hizi ni za siri.";
-        $response = Http::asForm()->post('http://41.59.227.219:9003/emis/send-sms', [
+        $response = Http::asForm()->post($url, [
             'message' => $message,
             'phoneNumber' => $user->phone_number,
         ]);
@@ -180,9 +181,8 @@ class forgotPasswordController extends Controller
 
             $otp = random_int(1000, 9999);
             $phno = $user->phone_number;
-            // $phno = '255762807070';
-            $url = 'http://41.59.227.219:9003/emis/send-sms';
-            // $url = nidaURL();
+            // $phno = '255713471801';
+            $url ='http://api.maadili.go.tz:9003/emis/send-sms';
 
             $response = Http::asForm()->post($url, [
                 'message' => "Your OTP is: $otp",
