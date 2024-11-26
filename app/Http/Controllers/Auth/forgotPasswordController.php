@@ -23,7 +23,7 @@ class forgotPasswordController extends Controller
     {
 
         $validator = Validator::make($request->all(),[
-            'usernames' => 'required',
+            'username' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json($validator->errors());
