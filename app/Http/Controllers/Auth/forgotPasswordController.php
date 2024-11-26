@@ -184,10 +184,10 @@ class forgotPasswordController extends Controller
             // $phno = '255713471801';
             $url ='http://api.maadili.go.tz:9003/emis/send-sms';
 
-            $response = Http::asForm()->post($url, [
-                'message' => "Your OTP is: $otp",
-                'phoneNumber' => $phno,
-            ]);
+            // $response = Http::asForm()->post($url, [
+            //     'message' => "Your OTP is: $otp",
+            //     'phoneNumber' => $phno,
+            // ]);
 
             // dd($response);
 

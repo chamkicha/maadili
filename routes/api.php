@@ -26,8 +26,7 @@ use App\Http\Controllers\IntegrityPledge\IntegrityPledgeController;
 |
 */
 Route::post('login', [AuthenticationController::class,'login']);
-Route::post('reset-password', [forgotPasswordController::class,'sendResetPassword']);
-// Route::post('send-otp', [forgotPasswordController::class,'sendOTP']);
+Route::post('send-otp', [forgotPasswordController::class,'sendOTP']);
 
 
 Route::post('declaration/auth/download', [userDeclarationController::class,'downloadAdfAuth']);
@@ -212,3 +211,5 @@ Route::group(['prefix' => 'govesb'], function(){
 
 
 });
+
+Route::post('reset-password', [forgotPasswordController::class,'sendResetPassword']);
