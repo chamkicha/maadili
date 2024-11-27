@@ -114,7 +114,7 @@ class forgotPasswordController extends Controller
 
     private function sendMessage($user) {
 
-        $url ='http://api.maadili.go.tz:9003/emis/send-sms';
+        $url =externalURL().'emis/send-sms';
         $message = "Ndugu kiongozi, ".$user->first_name.' '.$user->middle_name.' '.$user->last_name ." umefanikiwa kubadili nywila. Tafadhali tumia nywila: ".strtoupper($user->last_name)." kuingia kwenye mfumo.Taarifa hizi ni za siri.";
         $response = Http::asForm()->post($url, [
             'message' => $message,

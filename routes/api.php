@@ -26,7 +26,11 @@ use App\Http\Controllers\IntegrityPledge\IntegrityPledgeController;
 |
 */
 Route::post('login', [AuthenticationController::class,'login']);
-Route::post('send-otp', [forgotPasswordController::class,'sendOTP']);
+
+Route::middleware('verify.csrf.token')->group( function () {
+    // Route::post('send-otp', [forgotPasswordController::class,'sendOTP']);
+    Route::post('reset-password', [forgotPasswordController::class,'sendResetPassword']);
+});
 
 
 Route::post('declaration/auth/download', [userDeclarationController::class,'downloadAdfAuth']);
@@ -198,8 +202,6 @@ Route::controller(userDeclarationController::class)->group(function (){
 });
 
 
-
-
 Route::group(['prefix' => 'govesb'], function(){
     Route::post('exchange-rate', [govesbController::class,'exchangeRate']);
     Route::post('brela', [govesbController::class,'brela']);
@@ -209,7 +211,5 @@ Route::group(['prefix' => 'govesb'], function(){
     Route::post('OTRMIS-normal-request', [govesbController::class,'OTRMISNormalRequest']);
     Route::post('HCMIS-employees-request', [govesbController::class,'HCMISEmployeesRequest']);
 
-
 });
 
-Route::post('reset-password', [forgotPasswordController::class,'sendResetPassword']);
