@@ -1020,6 +1020,7 @@ class userDeclarationController extends Controller
                     ->where('id', '=', $request->user_declaration_id)->first();
 
             $data->is_deleted = true;
+            $data->adf_number = null;
             $data->save();
 
             $declaration = Declaration_type::where('id',$data->declaration_type_id)->first();
