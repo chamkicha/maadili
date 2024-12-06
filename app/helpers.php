@@ -30,7 +30,8 @@ if (!function_exists('externalURL')) {
 
 if (!function_exists('nidaURL')) {
     function nidaURL(){
-
+        $environment = env('APP_ENV');
+        
         if ($environment === 'local') {
             $URL = 'http://41.59.227.219:8089/api/public/';
 

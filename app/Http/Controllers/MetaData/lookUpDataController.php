@@ -156,7 +156,9 @@ class lookUpDataController extends Controller
             "ANSWER" => $request->ANSWER ?? '',
             "RQCODE" => $request->RQCODE ?? ''
         ];
+        \Log::info('taarifaNIN: ' . json_encode($data));
         $result = Http::post($URL, $data);
+        \Log::info('resultsNIN: ' . json_encode($result));
         $result = json_decode($result);
         return response()->json($result);
 

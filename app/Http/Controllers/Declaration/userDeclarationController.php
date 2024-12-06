@@ -632,6 +632,7 @@ class userDeclarationController extends Controller
 
             $year = Financial_year::where('is_active', '=', true)->first();
 
+            \Log::info('inafika:635');
             $check = User_declaration::where('user_id', '=', auth()->user()->id)
                 ->where('financial_year_id', '=', $request->input('financial_year_id'))
                 // ->where('declaration_type_id', '=', $declaration->id)
@@ -639,6 +640,7 @@ class userDeclarationController extends Controller
                 ->where('is_deleted', '=', false)
                 ->first();
                 // dd($check);
+                \Log::info('inafika:643');
             if ($check != null) {
                 $response = [
                     'statusCode' => 405,
@@ -649,11 +651,11 @@ class userDeclarationController extends Controller
                     'declaration_model' => $declaration_model,
                     'declaration_type_id' => $check->declaration_type_id,
                    'is_nyongeza' => $check->is_nyongeza
-            ];
-            return response()->json($response);
+                ];
+                return response()->json($response);
             }
 
-
+            \Log::info('inafika:658');
 
             $financial_year_check = User_declaration::where('user_id', '=', auth()->user()->id)
                 ->where('financial_year_id', '=', $request->input('financial_year_id'))
@@ -661,7 +663,7 @@ class userDeclarationController extends Controller
                 ->where('flag', '=', 'submit')
                 ->where('is_deleted', '=', false)
                 ->first();
-
+                \Log::info('inafika:666');
             if($financial_year_check != null && $declaration->declaration_model == 2){
                 $response = [
                     'statusCode' => 406,
@@ -671,7 +673,7 @@ class userDeclarationController extends Controller
                 return response()->json($response);
 
             }
-
+            \Log::info('inafika:676');
             $user_declaration = User_declaration::create([
                 'secure_token' => Str::uuid(),
                 'user_id' => auth()->user()->id,
@@ -680,6 +682,7 @@ class userDeclarationController extends Controller
                 'financial_year_id' => $request->input('financial_year_id'),
                 'flag' => $request->input('flag')
             ]);
+            \Log::info('inafika:685');
             $user_declarations_lookup = $this->user_declarations_lookup($user_declaration->id,$declaration->id);
             $generate_section_for_nyongeza_punguzo = $this->generate_section_for_nyongeza_punguzo($user_declaration->id,$declaration->id);
 
@@ -695,7 +698,8 @@ class userDeclarationController extends Controller
             return response()->json([
                 'statusCode' => 402,
                 'message' => 'Tatizo la kimtandao.',
-                'error' => $error,
+                'error' => $error
+                // 'line' => $error->getLine()
             ]);
         }
 
@@ -2448,7 +2452,10 @@ class userDeclarationController extends Controller
 
     private function generateAdfNumber($declarationCode, $year): string
     {
-        return 'ADF' . '-' . $declarationCode . '-' . $year . '-' . mt_rand(100, 999);
+        do {
+            $data = 'ADF' . '-' . $declarationCode . '-' . $year . '-' . mt_rand(100000, 999999);
+        } while (User_declaration::where('adf_number', $data)->exists());
+        return $data;
     }
 
     private function generateADFPassword(): string
